@@ -1,0 +1,28 @@
+{
+  "name": "sptools",
+  "version": "1.0.0",
+  "description": "Broad set of tools to analyze SharePoint sites",
+  "main": "SPtools.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mavigozler/SPTools.git"
+  },
+  "keywords": [
+    "SharePoint",
+    "utility",
+    "web",
+    "app"
+  ],
+  "author": "TypeScript Steve",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mavigozler/SPTools/issues"
+  },
+  "homepage": "https://github.com/mavigozler/SPTools#readme",
+  "devDependencies": {
+    "@types/jquery": "^3.5.14"
+  }
+}

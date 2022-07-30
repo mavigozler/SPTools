@@ -1,0 +1,79 @@
+div#liblist-container {
+   display: none;
+   width: 120em;
+   margin: 1em auto;
+}
+
+#liblist-container label {
+   display: inline-block;
+   margin: 0.5em 1em;
+   color: purple;
+   font: bold 10pt Helvetica, sans-serif;
+}
+
+#liblist-container input {
+   font: normal 11pt Arial, sans-serif;
+}
+
+form#theForm {
+   border: 1px solid blue;
+   padding: 1em 3em;
+   min-height: 25em;
+}
+
+p#title {
+   font: bold 14pt Verdana, sans-serif;
+   color: blue;
+}
+
+fieldset#date-control {
+   display: grid;
+   grid-template-columns: auto auto auto auto;
+   width: 40%;
+   align-items: center;
+   justify-items: center;
+   padding: 0 0.5em;
+   float: right;
+}
+
+fieldset#date-control p {
+   margin: 0;
+}
+
+fieldset#date-control label {
+   margin: 0.3em auto;
+}
+
+table {
+   border: 2px solid green;
+   width: 100%;
+   font:normal 10pt Helvetica,Arial,sans-serif;
+}
+
+td {
+   border: 1px solid black;
+   padding: 0.2em 0.5em;
+}
+
+th {
+   color: white;
+   background-color: black;
+}
+
+p#counts {
+   font: bold 10pt Verdana, sans-serif;
+}
+
+span#folder-count,
+span#file-count {
+   margin-right: 2em;
+   font: bold 13pt Arial, sans-serif;
+   color: green;
+}
+
+td.folderpath {
+   font: bold italic 83% 'Segoe UI', Tahoma, sans-serif;
+   color: blue;
+   background-color: #f0f0ff;
+   text-indent: 3em;
+}

@@ -1,0 +1,311 @@
+@media print {
+  @page {
+    size: letter landscape;
+  }
+}
+
+body {
+  background-color: #f8fff8;
+  font: normal 10pt Helvetica,Arial,sans-serif;
+}
+
+textarea {
+  resize: both;
+}
+
+select {
+  min-width: 8em;
+}
+
+fieldset {
+  padding: 0.5em 1em;
+  margin: 0.5em 1em;
+  border: 1px solid maroon;
+}
+
+legend {
+  font: bold 125% Calibri, Helvetica, sans-serif;
+  padding: 0 1em;
+  margin: 0 0.5em;
+  width: auto;
+}
+
+label {
+  font: bold italic 95% "Segoe UI", sans-serif;
+  display: inline-block;
+  margin: 0 0.5em;
+}
+
+.right {text-align: right;}
+.italic {font-style:italic;}
+.bold {font-weight:bold;}
+.green {color:green;}
+
+label.inner-label {
+  font: bold 90% Calibri, Arial, sans-serif;
+  color: #917;
+  align-self: center;
+}
+
+hr {
+  margin-top: 1em;
+  color: blue;
+  height: 5px;
+}
+
+input[disabled][type="checkbox"] {
+  height: 20px;
+  width: 20px;
+  color: cyan;
+  border: 1px solid black;
+}
+
+span#top-button-block {
+  display: inline-block;
+  margin-left: 25em;
+  font: normal 12pt Calibri, Arial, sans-serif;
+}
+
+input.prop-value {
+  width: 90%;
+}
+
+option.special-option {
+  font-style: italic;
+  font-weight: 300;
+}
+
+div#container {
+  width: 1200px;
+  padding: 1em 3em;
+  margin: 2em auto;
+  background-color: white;
+  border: 1px solid blue;
+  min-height: 20em;
+}
+
+#title {
+  font: bold 18pt Verdana, sans-serif;
+  color: navy;
+}
+
+span.menu-button {
+  display: inline-block;
+  width: 10em;
+  cursor: pointer;
+  text-align: center;
+  padding: 0.25em 0.75em;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.0625);
+  z-index: 1;
+}
+
+.menu-control {
+  background: none;
+  border: none;
+  text-align: center;
+}
+
+.four-col-grid {
+  display: grid;
+  grid-template-columns: 8em 1fr 8em 1fr;
+  row-gap: 10px;
+}
+
+.four-col-grid * {
+  vertical-align: top;
+}
+
+.four-col-grid label {
+  justify-self: end;
+  text-align: right;
+  margin-left: 1em;
+}
+
+.two-col-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  row-gap: 0.5em;
+  justify-items: start;
+}
+
+.two-col-grid * {
+  vertical-align: top;
+}
+
+.two-col-grid label {
+  justify-self: right;
+}
+
+div#content-panel {
+  min-height: 25em;
+  border: 1px solid #ddd;
+  border-top: none;
+  padding-top: 10px;
+}
+
+div#server-panel {
+  display: none;
+}
+
+div#site-panel {
+  display: none;
+}
+
+div#list-panel {
+  display: none;
+}
+
+div#user-panel {
+  display: none;
+}
+
+span.option-input {
+  display: inline-block;
+  margin: 0 2em;
+}
+
+
+span.bordered-span {
+  border: 2px solid navy;
+  font: normal 12pt 'Courier New', Courier, monospace;
+  width: 3em;
+  display: inline-block;
+  text-align: right;
+  background-color: #cad9fd;
+  margin: 0.3em 1em 0.3em 0;
+  vertical-align: middle;
+}
+
+p#dials * {
+  vertical-align: middle;
+}
+
+span#list-error {
+  font: normal 9pt Arial, sans-serif;
+  color: red;
+  margin: 0.2em 1em;
+}
+
+span#list-error.unknownError {
+  font: normal 9pt Arial, sans-serif;
+  color: red;
+  margin: 0.2em 1em;
+  white-space: pre-wrap;
+  height: 14em;
+  display: block;
+  overflow-y: scroll;
+}
+
+span#error-set,
+span#site-error-set {
+  color: red;
+  font: normal 83% Arial, sans-serif;
+  display: inline-block;
+}
+
+.fff8ff {
+  background-color: #fff8ff;
+}
+
+.fffff8 {
+  background-color: #fffff8;
+}
+
+.f8f8ff {
+  background-color: #f8f8ff;
+}
+
+.fff8f8 {
+  background-color: #fff8f8;
+}
+
+/* the next class is important,
+   it is usually a DIV containing the TABLE element */
+.subtable th {
+  background-color: sienna;
+  font: bold 12pt Consolas, sans-serif;
+}
+
+.tableFixHead {
+  overflow-y: auto;
+  height: 250px;
+}
+
+.tableFixHead th {
+  position: sticky;
+  top: 0;
+  background-color: black;
+  color: white;
+  text-align: center;
+}
+
+.tableFixHead td {
+  border: 1px solid black;
+}
+
+table#fields-table {
+  margin: 0.5em auto;
+  width: 95%;
+}
+
+table#items-table td {
+  vertical-align: top;
+}
+
+td.prop {
+  font: normal 9pt Monaco, 'Lucida Console', monospace;
+  background-color: silver;
+}
+
+td.propval {
+  font: normal 10pt 'Courier New', Courier, monospace;
+  color: navy;
+  padding-left: 0.3em;
+}
+
+#copied-text {
+  display: none;
+  border-radius: 3px;
+  border: 1px solid blue;
+  color: white;
+  background-color: blue;
+  padding: 2px;
+  text-align: center;
+  margin-top: 1em;
+}
+
+/* **********************************************************
+        REST Requesting styling
+************************************************************* */
+
+/* **********************************************************
+        Library Listing styling
+************************************************************* */
+span#ll-title {
+  font: bold 18pt Verdana, sans-serif;
+  color: navy;
+}
+
+p.request-control {
+  display:grid;
+  grid-template-columns: auto auto 1fr;
+  width: auto;
+  margin: 2em 0;
+  align-items: center;
+}
+
+span.sub-control {
+  display:grid;
+  grid-template-columns: auto 1fr;
+}
+
+span.input-control {
+  display: inline-block;
+  margin: 0.3em 2em;
+  color:purple;
+  font: bold 9pt Tahoma,sans-serif;
+}
