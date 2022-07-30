@@ -134,7 +134,7 @@ function listingOp(
             theForm.LibraryNameDuplicates.value,
             insertionPoint
          ) == false)
-            return alert("To use duplicate listing function, the query string must be of the form " + 
+            return alert("To use duplicate listing function, the query string must be of the form " +
                   "'?callfunc=DuplicateListing&siteURL=<site-url>&libName=<lib-name>&displaypage=liblist-container'");
       } else {
          if (duplicateListing(
@@ -142,19 +142,19 @@ function listingOp(
             theForm.LibraryNameDuplicates.value,
             insertionPoint
          ) == false)
-            return alert("To use duplicate listing function, the query string must be of the form " + 
+            return alert("To use duplicate listing function, the query string must be of the form " +
                   "'?callfunc=DuplicateListing&siteURL=<site-url>&libName=<lib-name>&displaypage=liblist-container'");
       }
       break;
 	case "makelibcopy":
       if (queryParts) {
-         if (queryParts.get("server") == null || queryParts.get("site") == null || 
+         if (queryParts.get("server") == null || queryParts.get("site") == null ||
                   queryParts.get("sourceLib") == null || queryParts.get("destLib") == null)
-            return alert("To use copy library function, the query string must be of the form:\n\n" + 
-                  "'?listingfunc=makelibcopy&\n" + 
-                  "sourcesitecopy=<source-site-url>&\n"  + 
-                  "sourcenamecopy=<source-list-name>&\n" + 
-                  "destsitecopy=<dest-site-url>&\n" + 
+            return alert("To use copy library function, the query string must be of the form:\n\n" +
+                  "'?listingfunc=makelibcopy&\n" +
+                  "sourcesitecopy=<source-site-url>&\n"  +
+                  "sourcenamecopy=<source-list-name>&\n" +
+                  "destsitecopy=<dest-site-url>&\n" +
                   "destnamecopy<dest-list-name>'");
          siteREST = new SPSiteREST({
             server: SERVER_NAME,
@@ -207,35 +207,35 @@ function generateURL(which: string): void {
    switch (which) {
    case "dupOrFolderFiles":
       if (theForm.dupOrFolderFiles.value == "dups")
-         theForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=duplicateListing&sitenamedups=" + 
-               encodeURIComponent(theForm.SiteNameDuplicates.value) + 
-               "&libnamedups=" + encodeURIComponent(theForm.LibraryNameDuplicates.value) + 
+         theForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=duplicateListing&sitenamedups=" +
+               encodeURIComponent(theForm.SiteNameDuplicates.value) +
+               "&libnamedups=" + encodeURIComponent(theForm.LibraryNameDuplicates.value) +
                "&displaypage=liblist-container";
       else if (theForm.dupOrFolderFiles.value == "folderfiles")
-         theForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=listFoldersAndFiles&siteurl=" + 
-               encodeURIComponent(theForm.SiteNameDuplicates.value) + 
-               "&libname=" + encodeURIComponent(theForm.LibraryNameDuplicates.value) + 
+         theForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=listFoldersAndFiles&siteurl=" +
+               encodeURIComponent(theForm.SiteNameDuplicates.value) +
+               "&libname=" + encodeURIComponent(theForm.LibraryNameDuplicates.value) +
                "&displaypage=liblist-container";
       break;
    case "copylib":
-      theForm.copyingGenUrl.value = noQueryLocation + "?listingfunc=makelibcopy&sourcesitecopy=" + 
-            encodeURIComponent(theForm.SourceSiteCopy.value) + 
+      theForm.copyingGenUrl.value = noQueryLocation + "?listingfunc=makelibcopy&sourcesitecopy=" +
+            encodeURIComponent(theForm.SourceSiteCopy.value) +
             "&sourcenamecopy=" + encodeURIComponent(theForm.SourceSiteCopy.value) +
             "&destsitecopy=" + encodeURIComponent(theForm.DestSiteCopy.value) +
-            "&destnamecopy=" + encodeURIComponent(theForm.DestNameCopy.value) + 
+            "&destnamecopy=" + encodeURIComponent(theForm.DestNameCopy.value) +
             "&displaypage=liblist-container";
       break;
    case "filediff":
-      theForm.filediffGenUrl.value = noQueryLocation + "?listingfunc=findfilediff&lib1sitepath=" + 
-            encodeURIComponent(theForm.Lib1SitePath.value) + 
+      theForm.filediffGenUrl.value = noQueryLocation + "?listingfunc=findfilediff&lib1sitepath=" +
+            encodeURIComponent(theForm.Lib1SitePath.value) +
             "&lib1name=" + encodeURIComponent(theForm.Lib1Name.value) +
             "&lib2sitepath=" + encodeURIComponent(theForm.Lib2SitePath.value) +
-            "&lib2name=" + encodeURIComponent(theForm.Lib2Name.value) + 
+            "&lib2name=" + encodeURIComponent(theForm.Lib2Name.value) +
             "&displaypage=liblist-container";
       break;
    case "liblisting":
-      theForm.generatedUrl.value = noQueryLocation + 
-            "?listingfunc=customlisting&csiteurl=" + encodeURIComponent(theForm.clistingSiteUrl.value) + 
+      theForm.generatedUrl.value = noQueryLocation +
+            "?listingfunc=customlisting&csiteurl=" + encodeURIComponent(theForm.clistingSiteUrl.value) +
             "&clibname=" + encodeURIComponent(theForm.clistingListName.value) +
             ((theForm.date.valueAsDate != null) ? ("&date=".concat(theForm.date.valueAsDate.toISOString())) : "") +
             ((theForm.displaytype.value != "") ? ("&dateType=".concat(theForm.displaytype.value)) : "") +
@@ -253,16 +253,16 @@ function duplicateListing(
    libName: string,
    insertionPoint: HTMLDivElement
 ): boolean {
-   let select: string = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",      
+   let select: string = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",
          expand: string = "File,Folder",
          leadingPath: RegExpMatchArray | null | string;
 
-	if (siteName.length == 0) 
+	if (siteName.length == 0)
 		return false;
    if ((leadingPath = siteName.match(/https:\/\/[^\/]+(\/.*)$/)) == null)
       return false;
    leadingPath = leadingPath[1] as string;
-	
+
    document.getElementById("working")!.style.display = "inline-block";
    RESTrequest({
       url: siteName + "/_api/web/lists/getByTitle('" + libName + "')/items" +
@@ -273,12 +273,12 @@ function duplicateListing(
           "Content-Type": "application/json;odata=verbose",
       },
       successCallback: (data: any /*, text, reqObj */) => {
-         let files: libItem[] = [], 
+         let files: libItem[] = [],
             folders: libItem[] = [],
-            start: number, 
-            relUrl: string, 
-            dupFiles: libItem[] = [], 
-            dupFolders: libItem[] = [], 
+            start: number,
+            relUrl: string,
+            dupFiles: libItem[] = [],
+            dupFolders: libItem[] = [],
             duping: boolean = false,
             libParts: RegExpMatchArray,
  //           libPart: string,
@@ -288,7 +288,7 @@ function duplicateListing(
          // compute the start index
          libParts = data[0].File.ServerRelativeUrl.match(leadingPath);
 //         libPart = libParts[0] + libParts.input!.substring(
-//               libParts[0].length, 
+//               libParts[0].length,
 //               libParts[0].length + 1 + libParts.input!.substring(libParts[0].length + 1).search(/\//)
 //            );
          start = siteName.length - siteName.match(/(https:\/\/[^\/]+)\//)![1].length;
@@ -302,7 +302,7 @@ function duplicateListing(
                   name: datum.File.Name,
                   type: 0,
                   originalUrl: datum.File.ServerRelativeUrl,
-                  relativeUrl: datum.File.ServerRelativeUrl.substr(start, 
+                  relativeUrl: datum.File.ServerRelativeUrl.substr(start,
                            datum.File.ServerRelativeUrl.length - start - datum.File.Name.length),
    //               folderPath: datum.File.ServerRelativeUrl.substring(libPart.length, datum.File.ServerRelativeUrl.lastIndexOf("/") + 1),
                   size: datum.File.Length,
@@ -310,7 +310,7 @@ function duplicateListing(
                   modified: datum.Modified,
                   tag: ""
                });
-            else 
+            else
                folders.push({
                   id: datum.Id,
                   name: datum.Folder.Name,
@@ -324,7 +324,7 @@ function duplicateListing(
                   modified: datum.Modified,
                   tag: ""
                });
-         
+
          files.sort((a: any, b: any) => {
             return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
          });
@@ -337,13 +337,13 @@ function duplicateListing(
                dupFiles.push(files[i]);
                duping = false;
             }
-         
+
          makeTable({
             title: "Replicate File Names in " + libName,
             subtitle: "(Site: " + siteName + ")",
             headers: [ "ID", "File Name", "Folder Path", "Size", "Created", "Modified" ],
             display: [
-               () => { return "$$id" }, 
+               () => { return "$$id" },
                () => { return "$$name" },
                () => { return "$$folderPath" },
                () => { return "$$size" },
@@ -373,7 +373,7 @@ function duplicateListing(
             subtitle: "(Site: " + siteName + ")",
             headers: [ "ID", "Folder Name", "Folder Path", "Created", "Modified" ],
             display: [
-               () => { return "$$id" }, 
+               () => { return "$$id" },
                () => { return "$$name" },
                () => { return "$$folderPath" },
                (item) => { return new Date(item.created).toLocaleDateString() },
@@ -400,13 +400,13 @@ function errorInput(message: string): void {
 function copyLibrary() {
     let srcSiteREST: SPSiteREST, destSiteREST: SPSiteREST;
 
-    if (theForm.SourceSiteCopy.value.length == 0) 
+    if (theForm.SourceSiteCopy.value.length == 0)
         return errorInput("Missing valid path URL to site for source library to be copied");
-    if (theForm.SourceNameCopy.value.length == 0) 
+    if (theForm.SourceNameCopy.value.length == 0)
         return errorInput("Missing valid name for source library to be copied");
-    if (theForm.DestSiteCopy.value.length == 0) 
+    if (theForm.DestSiteCopy.value.length == 0)
         return errorInput("Missing valid path URL to site for destination library for copy");
-    if (theForm.DestNameCopy.value.length == 0) 
+    if (theForm.DestNameCopy.value.length == 0)
         return errorInput("Missing valid name for destination library for copy");
     srcSiteREST = new SPSiteREST({
         server: ParseSPUrl(location.origin)!.server,
@@ -436,24 +436,24 @@ function findFileDifferences(
    lib2Name: string,
    insertionPoint: HTMLDivElement
 ) {   // compares the O&PEvidence original and copy libraries for file differences
-    let missingFiles: libItem[]  = [], 
+    let missingFiles: libItem[]  = [],
         commonFiles: libItem[] = [],
         missingFolders: libItem[] = [],
         commonFolders: libItem[] = [],
-        selectExpr: string = "Id,FileSystemObjectType,File/Name,File/Length,File/TimeCreated,File/TimeLastModified,File/ServerRelativeUrl," + 
-                  "Folder/Name,Folder/TimeCreated,Folder/TimeLastModified,Folder/ServerRelativeUrl,Created,Modified," + 
+        selectExpr: string = "Id,FileSystemObjectType,File/Name,File/Length,File/TimeCreated,File/TimeLastModified,File/ServerRelativeUrl," +
+                  "Folder/Name,Folder/TimeCreated,Folder/TimeLastModified,Folder/ServerRelativeUrl,Created,Modified," +
                   "ParentList/ItemCount,ParentList/Title",
         expandExpr: string = "File,Folder,ParentList",
         lib1ItemCount: number,
         lib2ItemCount: number;
 
-    if (lib1SitePath.length == 0) 
+    if (lib1SitePath.length == 0)
         return errorInput("Missing valid path URL to site for library 1");
-    if (lib1Name.length == 0) 
+    if (lib1Name.length == 0)
         return errorInput("Missing valid name for library 1");
-    if (lib2SitePath.length == 0) 
+    if (lib2SitePath.length == 0)
         return errorInput("Missing valid path URL to site for library 2");
-    if (lib2Name.length == 0) 
+    if (lib2Name.length == 0)
         return errorInput("Missing valid name for library 2");
     RESTrequest({
         url: lib1SitePath + "/_api/web/lists/getByTitle('" + lib1Name +  "')/items" +
@@ -464,14 +464,14 @@ function findFileDifferences(
             "Content-Type": "application/json;odata=verbose",
         },
         successCallback: (data: any /*, text, reqObj */) => {
-            let   L1Files: libItem[] = [], 
+            let   L1Files: libItem[] = [],
                   L1Folders: libItem[] = [],
                   sitePath: string,
                   start: number;
 
             if (data.results)
                data = data.results;
-            if ((sitePath = data[0].File.ServerRelativeUrl) == null) 
+            if ((sitePath = data[0].File.ServerRelativeUrl) == null)
                sitePath = data[0].Folder.ServerRelativeUrl;
             lib1ItemCount = data[0].ParentList.ItemCount;
             lib1Name = data[0].ParentList.Title;
@@ -485,7 +485,7 @@ function findFileDifferences(
                      type: 0,
                      originalUrl: datum.File.ServerRelativeUrl,
                      relativeUrl: datum.File.ServerRelativeUrl,
-  //                   folderPath: datum.File.ServerRelativeUrl.substring(start, 
+  //                   folderPath: datum.File.ServerRelativeUrl.substring(start,
    //                     datum.File.ServerRelativeUrl.length - datum.File.Name.length),
                      size: datum.File.Length,
                      created: datum.File.TimeCreated,
@@ -521,13 +521,13 @@ function findFileDifferences(
                     "Content-Type": "application/json;odata=verbose",
                 },
                 successCallback: (data: TSPResponseData/*, text, reqObj */) => {
-                  let   L2Files: libItem[] = [], 
+                  let   L2Files: libItem[] = [],
                         L2Folders: libItem[] = [],
-   //                     checkTag: string, 
-   //                     nextTag: string, 
-                        checkName: string, 
-                        checkUrl: string, 
-                        nextName: string, 
+   //                     checkTag: string,
+   //                     nextTag: string,
+                        checkName: string,
+                        checkUrl: string,
+                        nextName: string,
                         nextUrl: string,
                         combined: any[],
                         pNode: HTMLParagraphElement,
@@ -550,7 +550,7 @@ function findFileDifferences(
                            type: 0,
                            originalUrl: result.File.ServerRelativeUrl,
                            relativeUrl: result.File.ServerRelativeUrl,
-  //                         folderPath: result.File.ServerRelativeUrl.substring(start, 
+  //                         folderPath: result.File.ServerRelativeUrl.substring(start,
    //                           result.File.ServerRelativeUrl.length - result.File.Name.length),
                            size: result.File.Length,
                            created: result.Created,
@@ -585,7 +585,7 @@ function findFileDifferences(
                      makeTable({
                         headers: [ "ID", "File Name", "Tag", "Relative URL", "Created", "Modified" ],
                         display: [
-                           () => { return "$$id" }, 
+                           () => { return "$$id" },
                            () => { return "$$name" },
                            () => { return "$$tag" },
                            () => { return "$$relativeUrl" },
@@ -634,11 +634,11 @@ function findFileDifferences(
                     sNode = document.createElement("span");
                     pNode.appendChild(sNode);
                     sNode.appendChild(document.createTextNode(
-                        "SharePoint reported items: " + lib1ItemCount + 
-                              ",\u000a\u000aFile count: " + L1Files.length + 
+                        "SharePoint reported items: " + lib1ItemCount +
+                              ",\u000a\u000aFile count: " + L1Files.length +
                               ",\u000a\u000aFolder count: " + L1Folders.length
                     ));
-                  
+
                     pNode = document.createElement("p");
                     insertionPoint.appendChild(pNode);
                     sNode = document.createElement("span");
@@ -650,8 +650,8 @@ function findFileDifferences(
                     sNode = document.createElement("span");
                     pNode.appendChild(sNode);
                     sNode.appendChild(document.createTextNode(
-                     "SharePoint reported items:" + lib2ItemCount + 
-                           ",\u000a\u000aFile count: " + L2Files.length + 
+                     "SharePoint reported items:" + lib2ItemCount +
+                           ",\u000a\u000aFile count: " + L2Files.length +
                            ",\u000a\u000aFolder count: " + L2Folders.length
                     ));
 
@@ -673,7 +673,7 @@ function findFileDifferences(
                      title: "Missing Files",
                      headers: [ "ID", "Tag", "File Name", "Folder Path", "Size", "Created", "Modified" ],
                      display: [
-                        () => { return "$$id" }, 
+                        () => { return "$$id" },
                         () => { return "$$tag" },
                         () => { return "$$name" },
                         () => { return "$$folderPath" },
@@ -732,7 +732,7 @@ function findFileDifferences(
                    title: "Missing Folders",
                    headers: [ "ID", "Tag", "Folder Name", "Folder Path", "Size", "Created", "Modified" ],
                    display: [
-                      () => { return "$$id" }, 
+                      () => { return "$$id" },
                       () => { return "$$tag" },
                       () => { return "$$name" },
                       () => { return "$$folderPath" },
@@ -754,7 +754,7 @@ function findFileDifferences(
                   title: "Name-Sorted Combined Files",
                   headers: [ "ID", "Tag", "File Name", "Folder Path", "Size", "Created", "Modified" ],
                   display: [
-                     () => { return "$$id" }, 
+                     () => { return "$$id" },
                      () => { return "$$tag" },
                      () => { return "$$name" },
                      () => { return "$$folderPath" },
@@ -775,7 +775,7 @@ function findFileDifferences(
                   title: "Name-Sorted Combined Folders",
                   headers: [ "ID", "Tag", "Folder Name", "Folder Path", "Created", "Modified" ],
                   display: [
-                     () => { return "$$id" }, 
+                     () => { return "$$id" },
                      () => { return "$$tag" },
                      () => { return "$$name" },
                      () => { return "$$folderPath" },
@@ -808,7 +808,7 @@ function listFoldersAndFiles(
    libName: string,
    insertionPoint: HTMLDivElement
 ) {
-   let select: string = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",      
+   let select: string = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",
          expand: string = "File,Folder",
          leadingPath: RegExpMatchArray | null | string;
 
@@ -828,7 +828,7 @@ function listFoldersAndFiles(
          "Content-Type": "application/json;odata=verbose"
       },
       successCallback: (data: any /*, text, reqObj */) => {
-         let files: libItem[] = [], 
+         let files: libItem[] = [],
             folders: libItemEx[] = [],
             start: number,
             relUrl: string,
@@ -858,14 +858,14 @@ function listFoldersAndFiles(
                   name: datum.File.Name,
                   type: 0,
                   originalUrl: datum.File.ServerRelativeUrl,
-                  relativeUrl: datum.File.ServerRelativeUrl.substr(start, 
+                  relativeUrl: datum.File.ServerRelativeUrl.substr(start,
                            datum.File.ServerRelativeUrl.length - start - datum.File.Name.length),
                   size: datum.File.Length,
                   created: datum.Created,
                   modified: datum.Modified,
                   tag: ""
                });
-            else 
+            else
                folders.push({
                   id: datum.Id,
                   name: datum.Folder.Name,
@@ -940,7 +940,7 @@ function listFoldersAndFiles(
                   tempFolders2.push(folder);
             folders = tempFolders1.concat(tempFolders2);
          }
-               
+
          // final listing with folders out
          for (let folder of folders) {
             sortedItems.push({
@@ -1000,17 +1000,17 @@ function listFoldersAndFiles(
             subtitle: "(Site: " + siteName + ")",
             headers: [ "ID", "Folder of File Name", "Size", "Created", "Modified" ],
             display: [
-               () => { return "$$id" }, 
+               () => { return "$$id" },
                (item) => { return {
-                     attrib: item.type == 0 ? "class=right italic" : 
-                           item.type == 1 ? "class=bold" : "class=right green bold", 
+                     attrib: item.type == 0 ? "class=right italic" :
+                           item.type == 1 ? "class=bold" : "class=right green bold",
                      iValue: "$$name",
                      wrapLink: item.href
-                  } 
+                  }
                },
-               (item) => { return item.type == 2 ? "subfolder" : item.size == -1 ? "" : 
-                     item.size > (1024 * 1024) ? Math.floor(item.size / (1024 * 1024)) + " MB [ $$size ]" : 
-                     item.size > 1024 ? Math.floor(item.size / 1024) + " KB [ $$size ]" : 
+               (item) => { return item.type == 2 ? "subfolder" : item.size == -1 ? "" :
+                     item.size > (1024 * 1024) ? Math.floor(item.size / (1024 * 1024)) + " MB [ $$size ]" :
+                     item.size > 1024 ? Math.floor(item.size / 1024) + " KB [ $$size ]" :
                      "$$size" },
                (item) => { return new Date(item.created).toLocaleDateString() },
                (item) => { return new Date(item.modified).toLocaleDateString() },
@@ -1022,7 +1022,7 @@ function listFoldersAndFiles(
          document.getElementById("working")!.style.display = "none";
       },
       errorCallback: (reqObj/*, status, errThrown */) => {
-   
+
       }
    });
 }
@@ -1034,16 +1034,16 @@ function ReliabilityStandardValuesCheck() {  // provides listing of Reliability 
             "?$select=Id,Reliability_x0020_Standard,FileSystemObjectType",
         method: "GET",
         successCallback: (data: TSPResponseData) => {
-            let missCount: number = 0, 
-                multCount: number = 0, 
+            let missCount: number = 0,
+                multCount: number = 0,
                 fileCount: number = 0,
                 folderCount: number = 0,
-                pNode: HTMLParagraphElement, 
-                tblNode: HTMLTableElement, 
-                trNode: HTMLTableRowElement, 
+                pNode: HTMLParagraphElement,
+                tblNode: HTMLTableElement,
+                trNode: HTMLTableRowElement,
                 tdNode: HTMLTableCellElement,
-                sNode1: HTMLSpanElement, 
-                sNode2: HTMLSpanElement, 
+                sNode1: HTMLSpanElement,
+                sNode2: HTMLSpanElement,
                 sNode3: HTMLSpanElement,
                 sNode4: HTMLSpanElement,
                 sNode5: HTMLSpanElement,
@@ -1104,7 +1104,7 @@ function ReliabilityStandardValuesCheck() {  // provides listing of Reliability 
                     fileCount++;
                 else if (datum.FileSystemObjectType == 1)
                     folderCount++;
-               if ( datum.Reliability_x0020_Standard == null || 
+               if ( datum.Reliability_x0020_Standard == null ||
                     !datum.Reliability_x0020_Standard.results) {
 
                     trNode = document.createElement("tr");
@@ -1118,11 +1118,11 @@ function ReliabilityStandardValuesCheck() {  // provides listing of Reliability 
                     tdNode.appendChild(document.createTextNode("--"));
                     tdNode = document.createElement("td");
                     trNode.appendChild(tdNode);
-                    tdNode.appendChild(document.createTextNode("Missing values for Reliablility Standard")); 
-	
+                    tdNode.appendChild(document.createTextNode("Missing values for Reliablility Standard"));
+
                     missCount++;
                     missingIds.push(datum.Id);
-                } else if (datum.Reliability_x0020_Standard.results && 
+                } else if (datum.Reliability_x0020_Standard.results &&
                             datum.Reliability_x0020_Standard.results.length > 1) {
 					multCount++;
 					arr = datum.Reliability_x0020_Standard.results.join(";;") as string;
@@ -1192,13 +1192,13 @@ function clearErrors(): void {
  *             use split(";;") to disjoin, then use split("=") to get name=value pairs
  *      .data: any[]  the data items as array to be supplied and executed
  *      .attach: the form node to attach the table to
- *      .options: string[]  
+ *      .options: string[]
  */
 function makeTable(params: {
     headers: string[];
-    display: ((arg?: any) => string | 
+    display: ((arg?: any) => string |
       {
-         attrib: string; 
+         attrib: string;
          iValue: string;
          wrapLink?: string; // this is href attribute value
       }) [];
@@ -1209,22 +1209,22 @@ function makeTable(params: {
     subtitle?: string;
 }) {
    const ADD_COUNTER: number = 0x0001;
-   let tblNode: HTMLTableElement, 
-        trNode: HTMLTableRowElement, 
-        tdNode: HTMLTableCellElement, 
+   let tblNode: HTMLTableElement,
+        trNode: HTMLTableRowElement,
+        tdNode: HTMLTableCellElement,
         caption: HTMLTableCaptionElement,
         pNode: HTMLParagraphElement,
-        value: string | 
+        value: string |
             {
-               attrib: string; 
+               attrib: string;
                iValue: string;
                wrapLink?: string;
-            }, 
+            },
         cItem: { [key:string]: string;},
         options = 0x0000,
 
-        counterColumn = -1, 
-        matches, 
+        counterColumn = -1,
+        matches,
         counter = 0;
 
    if (params.options) {
@@ -1322,7 +1322,7 @@ function makeTable(params: {
 
    function setCellValue(item: any, value: string, wrapLink: string | null) {
       //  for "$$<object properties>"
-      let index: string[], 
+      let index: string[],
             part: string | undefined,
             vars: RegExpMatchArray | null,
             varsVals: string[] = [];
@@ -1339,7 +1339,7 @@ function makeTable(params: {
          cItem = item[index.shift() as string];
          while (typeof (part = index.shift()) !== "undefined")
             value = cItem[part];
-      } else 
+      } else
          value = item[value]; */
       if (wrapLink && wrapLink.length > 0) {
          let anchor: HTMLAnchorElement;
@@ -1369,7 +1369,7 @@ function specialListing(
    // 1. init  2. get the fields of interest, learn their type 3. construct query
    docLibREST.init().then(() => {
       docLibREST.getListItemsWithQuery({
-         select: "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl," + 
+         select: "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl," +
                "File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",
          selectDisplay: ["Year", "Rel Standard"],
          expand: "File,Folder",
@@ -1380,11 +1380,11 @@ function specialListing(
             subtitle: "(Site: " + siteName + ")",
             headers: [ "ID", "Folder Name", "Year", "Rel. Std", "Contained Items", "Modified", "Created" ],
             display: [
-               () => { return "$$id" }, 
+               () => { return "$$id" },
                () => { return "$$name" },
                () => { return "$$year" },
                () => { return "$$relstd" },
-               () => { 
+               () => {
                   return {
                      attrib: "class=whitespace",
                      iValue: "file count: $$filesCount\nsubfolders count: $$foldersCount"
@@ -1397,9 +1397,9 @@ function specialListing(
             attach: insertionPoint,
             options: ["addCounter{1}"]
          });
-      
+
       }).catch((response: any) => {
-      
+
       });
    }).catch((response: any) => {
    });
@@ -1413,26 +1413,26 @@ function customListing() {
 
 function updateListing(options?: TListingOptions) {
    const form: HTMLFormElement = document.getElementById("theForm") as HTMLFormElement;
-   let url: string, 
+   let url: string,
       filter: string = "",
 		libName: string = form.clistingListName.value,
 		dateSetStatus: number = 0x0,
-      itemsSelect: string = "$select=Id," + 
+      itemsSelect: string = "$select=Id," +
             "FileSystemObjectType," +
             "File/Name," +
             "File/ServerRelativeUrl," +
-            "Folder/Name," + 
-            "Folder/ItemCount," + 
-            "Folder/ServerRelativeUrl," + 
-            "File/Length," + 
-            "File/Author/Title," + 
-            "File/ModifiedBy/Title," + 
-            "File/TimeCreated," + 
+            "Folder/Name," +
+            "Folder/ItemCount," +
+            "Folder/ServerRelativeUrl," +
+            "File/Length," +
+            "File/Author/Title," +
+            "File/ModifiedBy/Title," +
+            "File/TimeCreated," +
             "ParentList/ParentWebUrl," +
             "ParentList/Title," +
             "ParentList/ItemCount," +
             "File/TimeLastModified",
-      itemsExpand = "$expand=Properties,Folder,File,Folder/Folders,Folder/Files,Folder/ListItemAllFields," + 
+      itemsExpand = "$expand=Properties,Folder,File,Folder/Folders,Folder/Files,Folder/ListItemAllFields," +
 					"File/Author,File/ModifiedBy,ParentList";
 
 	SiteUrl = form.clistingSiteUrl.value;
@@ -1495,12 +1495,12 @@ function updateListing(options?: TListingOptions) {
 }
 
 function processData(
-    itemsData: any[], 
+    itemsData: any[],
     options: any
 ): void {
-	let tblNode: HTMLTableElement, 
-        divNode: HTMLDivElement, 
-        sNode: HTMLSpanElement, 
+	let tblNode: HTMLTableElement,
+        divNode: HTMLDivElement,
+        sNode: HTMLSpanElement,
         pNode: HTMLParagraphElement,
 		  fileFolderPath: string,
 		file: TProcessedFile,
@@ -1524,12 +1524,12 @@ function processData(
 			if (options.dateType == "created") {
 				if (options.dateBorder == "before") {
 					if (new Date(item.File.TimeCreated) > options.date)
-						continue; 
+						continue;
 				} else if (new Date(item.File.TimeCreated) < options.date)
 					continue;
 			} else if (options.dateBorder == "before") {
 				if (new Date(item.File.TimeLastModified) > options.date)
-					continue; 
+					continue;
 				else if (new Date(item.File.TimeLastModified) < options.date)
 					continue;
 			}
@@ -1613,23 +1613,23 @@ function processData(
 
 /**
  * @function listAsRetrieved -- used for lisitng of files in folderless libraries
- * @param files 
- * @param options 
- * @param tblNode 
+ * @param files
+ * @param options
+ * @param tblNode
  */
 function listFolderlessLibrary(
-    files: TProcessedFile[], 
+    files: TProcessedFile[],
     options: TListingOptions,
     tblNode: HTMLTableElement
 ): void {
-	let trNode: HTMLTableRowElement, 
+	let trNode: HTMLTableRowElement,
         tdNode: HTMLTableCellElement,
         tableHeaders: {
             name: string;
             width: number;
-        }[] = [ 
-         	{name:"File Name", width: -1}, 
-            {name: "Size", width: -1 }, 
+        }[] = [
+         	{name:"File Name", width: -1},
+            {name: "Size", width: -1 },
             {name:"Creator/Date", width: 18 },
             {name: "Last Modified By/Date", width: 18}
          ],
@@ -1700,18 +1700,18 @@ function listFolderlessLibrary(
 		trNode.appendChild(tdNode);
 		tdNode.appendChild(document.createTextNode(
 			new Date(file.created).toLocaleDateString()
-		));   
+		));
 
 		tdNode = document.createElement("td");
 		trNode.appendChild(tdNode);
 		tdNode.appendChild(document.createTextNode(
 			new Date(file.modified).toLocaleDateString()
-		));            
+		));
 	}
 }
 
 /**
- * 
+ *
  * @param {arrayOfObjects} files -- should be an array of objects with 4 properties:
  *     { folder: <string>, itemName: <string>, size: <number>, authorName: <string> }
  * @param {arrayOfObjects} folders -- should be an array of objects with 4 properties:
@@ -1725,16 +1725,16 @@ function listByFolderGrouping(
  	options: TListingOptions,
     tblNode: HTMLTableElement
 ): void {
-	let pName: string, 
-        fileSize: number | string, 
+	let pName: string,
+        fileSize: number | string,
 		  mix: TProcessedFile[] = [],
 		  colspan: number = 3,
-        trNode: HTMLTableRowElement, 
-        tdNode: HTMLTableCellElement, 
+        trNode: HTMLTableRowElement,
+        tdNode: HTMLTableCellElement,
         tableHeaders: {
             name: string;
             width: number;
-        }[] = [ 
+        }[] = [
                 {name:"File/Folder Name", width: -1 },
                 {name: "Size", width: -1 },
                 {name:"Creator/Date", width: -1 },
@@ -1871,7 +1871,7 @@ function listByFolderGrouping(
 							"Created",
 							"Modified"
 						];
-		
+
 				trNode = document.createElement("tr");
 				tblNode.appendChild(trNode);
 				tdNode = document.createElement("td");
@@ -1937,15 +1937,15 @@ function listByFolderGrouping(
 
 function dataTransformer() {
     RESTrequest({
-        url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" + 
+        url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                             "getByTitle('PSMP_dev')?$expand=ContentTypes&$select=ContentTypes/Id/StringValue,ContentTypes/Name",
         method: "GET",
         successCallback: (data) => {
             let ListContentTypes: {
                 name: string;
                 id: string;
-            }[] = [ ], 
-                results: any = data.d!.ContentTypes.results, 
+            }[] = [ ],
+                results: any = data.d!.ContentTypes.results,
                 DocumentContentTypeId: string | null = null;
 
             for (let result of results) {
@@ -1957,8 +1957,8 @@ function dataTransformer() {
                 });
             }
             RESTrequest({
-                url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" + 
-                            "getByTitle('PSMP_dev')/items?$select=Id,Level_x0020_1,File/Name" + 
+                url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
+                            "getByTitle('PSMP_dev')/items?$select=Id,Level_x0020_1,File/Name" +
                             ((DocumentContentTypeId != null) ? "&$filter=ContentTypeId eq '" + DocumentContentTypeId + "'" : "") +
                             "&$expand=File",
                 method: "GET",
@@ -1966,8 +1966,8 @@ function dataTransformer() {
                     let ctype: {
                             name: string;
                             id: string;
-                        }, 
-                        idx: number, 
+                        },
+                        idx: number,
                         results: any = data;
 
                     for (idx = 0; idx < results.length; idx++) {
@@ -1979,7 +1979,7 @@ function dataTransformer() {
                         setTimeout(() => {
                             RESTrequest({
                                 setDigest: true,
-                                url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" + 
+                                url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                                         "getByTitle('PSMP_dev')/items(" + results[idx].Id + ")",
                                 method: "POST",
                                 headers: {
@@ -1991,8 +1991,8 @@ function dataTransformer() {
                                     "ContentTypeId": ctype.id
                                 }),
                                 successCallback: (data, text, reqObj) => {
-                                    console.log("response data => " + 
-                                        JSON.stringify(data) + 
+                                    console.log("response data => " +
+                                        JSON.stringify(data) +
                                         "\nrequestObj => " +
                                         JSON.stringify(reqObj));
                                 },
