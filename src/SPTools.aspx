@@ -18,28 +18,28 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
 
   <!--
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js" 
-            integrity="sha512-2AL/VEauKkZqQU9BHgnv48OhXcJPx9vdzxN1JrKDVc4FPU/MEE/BZ6d9l0mP7VmvLsjtYwqiYQpDskK9dG8KBA==" 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js"
+            integrity="sha512-2AL/VEauKkZqQU9BHgnv48OhXcJPx9vdzxN1JrKDVc4FPU/MEE/BZ6d9l0mP7VmvLsjtYwqiYQpDskK9dG8KBA=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   -->
   <script src="https://ajax.aspnetcdn.com/ajax/4.0/1/MicrosoftAjax.js"></script>
   <script src="/_layouts/15/sp.runtime.js"></script>
   <script src="/_layouts/15/sp.js"></script>
 
-  <script src="SPREST/SPRESTGlobals.js"></script>
-  <script src="SPREST/SPListREST.js"></script>
-  <script src="SPREST/SPSiteREST.js"></script>
-  <script src="SPREST/SPUserREST.js"></script>
-  <script src="SPREST/SPRESTSupportLib.js"></script>
+  <script src="$(SPREST_JS_FolderPath)/SPRESTGlobals.js"></script>
+  <script src="$(SPREST_JS_FolderPath)/SPListREST.js"></script>
+  <script src="$(SPREST_JS_FolderPath)/SPSiteREST.js"></script>
+  <script src="$(SPREST_JS_FolderPath)/SPUserREST.js"></script>
+  <script src="$(SPREST_JS_FolderPath)/SPRESTSupportLib.js"></script>
 
- <script src="SPTools.js"></script>
-  <script src="SPOtherTools.js"></script>
+ <script src="$(SPTOOLS_JS_FolderPath)/SPTools.js"></script>
+  <script src="$(SPTOOLS_JS_FolderPath)/SPOtherTools.js"></script>
  <!-- <script src="testing.js"></script> -->
-  <script src="REST%20Requesting.js"></script>
-  <script src="liblisting.js"></script>
-  <link href="RestRequesting.css" rel="stylesheet" />
-  <link href="liblisting.css" rel="stylesheet" />
-  <link href="SPTools.css" rel="stylesheet" />
+  <script src="$(SPTOOLS_JS_FolderPath)/REST%20Requesting.js"></script>
+  <script src="$(SPTOOLS_JS_FolderPath)/liblisting.js"></script>
+  <link href="$(CSS_FolderPath)/RestRequesting.css" rel="stylesheet" />
+  <link href="$(CSS_FolderPath)/liblisting.css" rel="stylesheet" />
+  <link href="$(CSS_FolderPath)/SPTools.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -66,9 +66,9 @@
         <div id="server-panel">
 
           <p class="four-col-grid">
-            <label>URL:</label>
+            <label for="serverName">URL:</label>
             <span>
-              <input name="server-name" size="35" />
+              <input name="server-name" id="serverName" size="35" />
             </span>
 
             <label style="padding-left:1.5em;" for="sites-list">Sites on this server</label>
@@ -89,25 +89,25 @@
             </span>
 
             <span style="grid-column:1 / span 4;">
-              <label>Property Value</label>
+              <label for="propertyValue">Property Value</label>
             </span>
             <span style="grid-column:2 / 4">
-              <textarea name="property-value" rows="4" style="min-width:80%;"></textarea>
+              <textarea name="property-value" id="PropertyValue" rows="4" style="min-width:80%;"></textarea>
               <input type="hidden" name="selectedProperty" />
             </span>
 
           </p>
 
         </div> <!-- id=server-panel -->
-        <!-- 
+        <!--
                  SITE PANEL
 -->
         <div id="site-panel">
 
           <div class="four-col-grid">
-            <label>URL:</label>
+            <label for="siteName">URL:</label>
             <span>
-              <input name="site-name" size="55" onchange="setSiteAsCurrent(this);" />
+              <input name="site-name" id="siteName" size="55" onchange="setSiteAsCurrent(this);" />
             </span>
 
             <label style="padding-left:1.5em;" for="sites-list">Subites to this site</label>
@@ -128,9 +128,9 @@
               </span>
             </span>
 
-            <label>Property Value</label>
+            <label for="sitePropertyValue">Property Value</label>
             <span>
-              <textarea name="site-property-value" rows="4" cols="60"></textarea>
+              <textarea name="site-property-value" id="sitePropertyValue" rows="4" cols="60"></textarea>
               <input type="hidden" name="selectedSiteProperty" />
             </span>
 
@@ -143,21 +143,21 @@
               <span id="copied-text">Copied</span>
             </span>
             <p class="two-col-grid">
-              <label class="inner-label">Content Type ID</label>
-              <input onfocus="makeCopy(this);" class="prop-value" name="cont-type-id" />
+              <label class="inner-label" for="contTypeId">Content Type ID</label>
+              <input onfocus="makeCopy(this);" class="prop-value" name="cont-type-id" id="contTypeId"/>
 
-              <label class="inner-label">Group</label>
-              <input onfocus="makeCopy(this);" class="prop-value" name="cont-type-group" />
+              <label class="inner-label" for="contTypeGroup">Group</label>
+              <input onfocus="makeCopy(this);" class="prop-value" name="cont-type-group" id="contTypeGroup"/>
 
-              <label class="inner-label">Parent (+ID)</label>
-              <input onfocus="makeCopy(this);" class="prop-value" name="cont-type-parent" />
+              <label class="inner-label" for="contTypeParent">Parent (+ID)</label>
+              <input onfocus="makeCopy(this);" class="prop-value" name="cont-type-parent" id="contTypeParent" />
 
               <span style="grid-column: 1 / span 2;">
-                <label class="inner-label">Read Only</label>
-                <input type="checkbox" disabled name="cont-type-readonly" />
+                <label class="inner-label" for="contTypeReadonly">Read Only</label>
+                <input type="checkbox" disabled name="cont-type-readonly" id="contTypeReadonly"/>
 
-                <label class="inner-label">Sealed</label>
-                <input type="checkbox" disabled name="cont-type-sealed" />
+                <label class="inner-label" for="contTypeSealed">Sealed</label>
+                <input type="checkbox" disabled name="cont-type-sealed" id="contTypeSealed"/>
 
                 <span style="display:inline-block;text-align:right;font:normal 83% Arial,sans-serif;">
                   Click inside an input box to automatically copy the text
@@ -177,13 +177,13 @@
           </div>
         </div> <!-- id=site-panel -->
 
-        <!-- 
+        <!--
                  LIST PANEL
 -->
         <div id="list-panel">
           <div class="four-col-grid">
-            <label style="grid-row:1 / span 2;">Site lists</label>
-            <select style="grid-row: 1 / span 2;" name="site-lists2" size="4"
+            <label style="grid-row:1 / span 2;" for="siteLists2">Site lists</label>
+            <select style="grid-row: 1 / span 2;" name="site-lists2" id="siteLists2" size="4"
               onchange="selectListFromSiteTab(this)"></select>
 
             <div style="grid-column:3 / span 2;width:100%;">
@@ -237,10 +237,10 @@
               <label>End ID</label> <span id="list-item-end-id" class="bordered-span">&nbsp;</span>
             </p>
             <span>
-              <label>Select Id:</label>
+              <label for="currentId">Select Id:</label>
               <button type="button" onclick="fetchListItemId(this, 'nextdown')"><img
                   src="../Site%20Images/left%20arrowhead.png" style="width:20px;" alt="decrease" /></button>
-              <input name="currentId" onchange="fetchListItemId(this, this.value)" size="5"
+              <input name="currentId" id="currentId" onchange="fetchListItemId(this, this.value)" size="5"
                 style="text-align:center;" />
               <button type="button" onclick="fetchListItemId(this, 'nextup')"><img
                   src="../Site%20Images/right%20arrowhead.png" style="width:20px;" alt="increase" /></button>
@@ -271,8 +271,8 @@
             <span style="margin: auto 0.5em;text-align:right;">
               <button type="button" onclick="copylist(this);">Copy</button></span>
             <span>
-              <label>Dest list/lib name:</label><input name="newCopyName" size="35" />
-              <br /><label># items:</label><input name="itemsToCopy" size="4" />
+              <label for="newCopyName">Dest list/lib name:</label><input name="newCopyName" id="newCopyName" size="35" />
+              <br /><label for="itemsToCopy"># items:</label><input name="itemsToCopy" id="itemsToCopy" size="4" />
             </span>
             <div>
               <!-- Setting columns for copy list/library -->
@@ -329,9 +329,9 @@
             OPTIONS</span>
         </fieldset>
 
-        <label>URL:</label> <input size="120" id="request-url" name="url" data-lpignore="true" value="https://" />
-        <label>select:</label> <input size="120" name="ODataSelect" data-lpignore="true" />
-        <label>filter:</label> <input size="120" name="ODataFilter" data-lpignore="true" />
+        <label for="request-url">URL:</label> <input size="120" id="request-url" name="url" data-lpignore="true" value="https://" />
+        <label for="ODataSelect">select:</label> <input size="120" name="ODataSelect" id="ODataSelect" data-lpignore="true" />
+        <label for="ODataFilter">filter:</label> <input size="120" name="ODataFilter" id="ODataFilter" data-lpignore="true" />
         <label>expand:</label>
         <p style="margin:0;padding:0;display:inline;">
           <input id="expand-input" name="ODataExpand" style="width:100%;" data-lpignore="true" />
@@ -406,11 +406,11 @@
         <img src="../Site%20Images/processing.gif" alt="working" style="width:100px" />
         Working
       </span>
-    </p> 
+    </p>
     <div id="request-controls">
       <p class="request-control">
         <span>
-          <button type="button" onclick="customListing();">Custom listing</button> 
+          <button type="button" onclick="customListing();">Custom listing</button>
         </span>
         <span class="sub-control"></span>
       </p>
@@ -420,9 +420,9 @@
       <button type="button" onclick="listingOp('listFoldersAndFiles', this.form);">List Folders with Their Files</button> </span>
       </span>
       <span class="sub-control">
-        <span class="input-control">Site:<br /><input name="SiteNameDuplicates" size="60"  
+        <span class="input-control">Site:<br /><input name="SiteNameDuplicates" size="60"
           onchange="localStorage.setItem('sitenamedups', this.value);" /></span>
-        <span class="input-control">Libary Name:<br /><input name="LibraryNameDuplicates" size="25"  
+        <span class="input-control">Libary Name:<br /><input name="LibraryNameDuplicates" size="25"
           onchange="localStorage.setItem('libnamedups', this.value);" /></span>
       </span>
       <span>
@@ -436,13 +436,13 @@
       <p class="request-control"><span>
         <button type="button" onclick="listingOp('makelibcopy', this.form);">Copy a list</button> </span>
         <span class="sub-control">
-          <span class="input-control">Site of source:<br /><input name="SourceSiteCopy" size="60"  
+          <span class="input-control">Site of source:<br /><input name="SourceSiteCopy" size="60"
             onchange="localStorage.setItem('sourcesitecopy', this.value);" /></span>
-          <span class="input-control">Name of source:<br /><input name="SourceNameCopy" size="25"  
+          <span class="input-control">Name of source:<br /><input name="SourceNameCopy" size="25"
             onchange="localStorage.setItem('sourcenamecopy', this.value);" /></span>
-          <span class="input-control">Site of destination:<br /><input name="DestSiteCopy" size="60"  
+          <span class="input-control">Site of destination:<br /><input name="DestSiteCopy" size="60"
             onchange="localStorage.setItem('destsitecopy', this.value);" /></span>
-          <span class="input-control">Name of destination:<br /><input name="DestNameCopy" size="25"  
+          <span class="input-control">Name of destination:<br /><input name="DestNameCopy" size="25"
             onchange="localStorage.setItem('destnamecopy', this.value);" /></span>
         </span>
         <span>
@@ -454,13 +454,13 @@
       <p class="request-control"><span>
         <button type="button" onclick="listingOp('findfilediff', this.form);">Check file differences</button> </span>
         <span class="sub-control">
-          <span class="input-control">Site of library 1:<br /><input name="Lib1SitePath" size="60" 
+          <span class="input-control">Site of library 1:<br /><input name="Lib1SitePath" size="60"
               onchange="localStorage.setItem('lib1sitepath', this.value);" /></span>
-          <span class="input-control">Name of library 1:<br /><input name="Lib1Name" size="25" 
+          <span class="input-control">Name of library 1:<br /><input name="Lib1Name" size="25"
             onchange="localStorage.setItem('lib1name', this.value);" /></span>
-          <span class="input-control">Site of library 2:<br /><input name="Lib2SitePath" size="60" 
+          <span class="input-control">Site of library 2:<br /><input name="Lib2SitePath" size="60"
             onchange="localStorage.setItem('lib2sitepath', this.value);" /></span>
-          <span class="input-control">Name of library 2:<br /><input name="Lib2Name" size="25" 
+          <span class="input-control">Name of library 2:<br /><input name="Lib2Name" size="25"
             onchange="localStorage.setItem('lib2name', this.value);" /></span>
         </span>
         <span>
@@ -484,9 +484,9 @@
   pageform.LibraryNameDuplicates.value = localStorage.getItem('libnamedups');
 </script>
     <div id="custom-listing" style="display:none;">
-      <label>Site URL path: <input name="clistingSiteUrl" size="80" 
+      <label>Site URL path: <input name="clistingSiteUrl" size="80"
           onchange="localStorage.setItem('clistingsiteurl', this.value);" /></label>
-      <label>List/Library name: <input name="clistingListName" size="25" 
+      <label>List/Library name: <input name="clistingListName" size="25"
         onchange="localStorage.setItem('clistinglistname', this.value);" /></label>
       <div> <!-- options panel -->
         <button type="button" onclick="listingOp(null, this.form);">Update Listing</button>

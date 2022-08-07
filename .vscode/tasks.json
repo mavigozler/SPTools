@@ -7,11 +7,33 @@
 			"problemMatcher": [
 				"$tsc"
 			],
+			"group": "build",
+			"label": "tsc: build - tsconfig.json"
+		},
+		{
+			"label": "PowerShell SPTTools build",
+			"type": "shell",
+			"command": "pwsh ${workspaceFolder}/build-Tools/buildSPToolsV2.ps1",
+			"windows": {
+				"command": "pwsh ${workspaceFolder}/build-Tools/buildSPToolsV2.ps1"
+			},
+			"args": [
+				"-Env", "dev"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"label": "tsc: build - tsconfig.json"
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false,
+				"group": "build"
+			},
+			"problemMatcher": []
 		}
 	]
 }

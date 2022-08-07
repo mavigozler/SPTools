@@ -5,10 +5,20 @@
    "version": "0.2.0",
    "configurations": [
       {
-         "name": "Build & Copy SPTools To SharePoint",
+         "name": "Test PS Script",
          "type": "PowerShell",
          "request": "launch",
-         "script": "${workspaceFolder}/build-tools/buildSPTools.ps1",
+         "script": "${workspaceFolder}/build-tools/test.ps1",
+         "cwd": "${workspaceFolder}"
+      },
+      {
+         "name": "Build SPTools",
+         "type": "PowerShell",
+         "request": "launch",
+         "script": "${workspaceFolder}/build-tools/buildSPToolsV2.ps1",
+         "args": [
+            "-Env", "dev"
+         ],
          "cwd": "${workspaceFolder}"
       }
    ]

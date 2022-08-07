@@ -1,0 +1,20 @@
+﻿{
+   "P1": {
+      "P1-1": {
+         "P1-1-1": "value of P1-1-1 as a string",
+         "P1-1-2": "value of P1-1-2 as a string"
+      },
+      "P1-2": [
+         "element 1 of array which is P1-2",
+         "element 2 of array which is P1-2"
+      ]
+   },
+   "P2": {
+      "P2-1": "value of P2-1 as a string",
+      "P2-2": "value of P2-2 as a string"
+   },
+   "P3": {
+
+   },
+   "P4": "value of P4 as a string"
+}

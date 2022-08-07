@@ -1,0 +1,184 @@
+﻿{
+   "dev": {
+      "rootpaths": {
+         "projectRootDir": "D:/dev/SharePoint/SPTools",
+         "copyTargetRootDir": "C:/Users/Mitch/California Department of Water Resources/Change Advisory Board - Site Assets/SPTools"
+      },
+      "specialFiles" : {
+         "lastCompileDateFileName": "lastCompileTime.txt"
+      },
+      "source": {
+         "entryFile": {
+            "path": "${rootpaths.projectRootDir}/src/SPTools.aspx",
+            "variableValues": [
+               { "variableName": "SPREST_FolderPath", "value": "/js/SPREST" },
+               { "variableName": "SPTOOLS_JS_FolderPath", "value": "/js" },
+               { "variableName": "CSS_FolderPath", "value": "/css" }
+            ]
+         },
+         "tsFiles": {
+            "tsconfigJsonPath": "${rootpaths.projectRootDir}/tsconfig.json",
+            "transpiledSameFolder": true,
+            "pathsAndCopyTargets": [
+               { "sourceRelativePath": "/src/ts", "copyTargetRelativePath": "" },
+               { "sourceRelativePath": "/SPREST/src", "copyTargetRelativePath": "/SPREST" }
+            ]
+         },
+         "otherSourceFiles": [
+            {
+               "path": "${rootpaths.projectRootDir}/src",
+               "fName": "*.css",
+               "localFinalCopyPath": "${rootpaths.projectRootDir}/out/css",
+               "copyTargetRelativePath": "/css"
+            },
+            {
+               "path": "${rootpaths.projectRootDir}/src",
+               "fName": "*.aspx",
+               "localFinalCopyPath": "${rootpaths.projectRootDir}/out",
+               "copyTargetRelativePath": "."
+            }
+         ]
+      },
+      "backup": {
+         "preBuildBackup": {
+            "backupDestinationPath": "${rootpaths.copyTargetRootDir}/Backup",
+            "items": [
+               {
+                  "from": "${rootpaths.projectRootDir}/build-tools/*.ps1",
+                  "to": "${backup.preBuildBackup.backupDestinationPath}/build-tools"
+               },
+               {
+                  "from": "${rootpaths.projectRootDir}/.vscode/*.json",
+                  "to": "${backup.preBuildBackup.backupDestinationPath}/vscode"
+               },
+               {
+                  "from": "${rootpaths.projectRootDir}/*.json",
+                  "to": "${backup.preBuildBackup.backupDestinationPath}/projectFiles"
+               }
+            ]
+         },
+         "postBuildBackup": {
+            "backupDestinationPath": "",
+            "items": []
+         }
+      }
+   },
+   "test": {
+      "rootpaths": {
+         "projectRootDir": "D:/dev/SharePoint/SPTools",
+         "copyTargetRootDir": "C:/Users/Mitch/California Department of Water Resources/Change Advisory Board - Site Assets/SPTools",
+         "backupRoot": "${copyTargetRootDir}/Backup"
+      },
+      "specialFiles:" : {
+         "lastCompileDateFileName": "lastCompileTime.txt"
+      },
+      "source": {
+         "entryFile": {
+            "path": "${projectRootDir}/src/SPTools.aspx",
+            "variableValues": [
+               { "variableName": "SPREST_FolderPath", "value": "/js/SPREST" },
+               { "variableName": "SPTOOLS_JS_FolderPath", "value": "/js" },
+               { "variableName": "CSS_FolderPath", "value": "/css" }
+            ]
+         },
+         "tsFiles": {
+            "tsconfigJsonPath": "${projectRootDir}/tsconfig.json",
+            "transpiledSameFolder": true,
+            "pathsAndCopyTargets": [
+               { "sourceRelativePath": "/src/ts", "copyTargetRelativePath": "" },
+               { "sourceRelativePath": "/SPREST/src", "copyTargetRelativePath": "/SPREST" }
+            ]
+         },
+         "otherSourceFiles": [
+            {
+               "path": "${projectRootDir}/src",
+               "fName": "*.css",
+               "localFinalCopyPath": "${projectRootDir}/out/css",
+               "copyTargetRelativePath": "/css"
+            },
+            {
+               "path": "${projectRootDir}/src",
+               "fName": "*.aspx",
+               "localFinalCopyPath": "${projectRootDir}/out",
+               "copyTargetRelativePath": "."
+            }
+         ]
+      },
+      "backup": {
+         "preBuildBackup": [
+            {
+               "from": "${projectRootDir}/build-tools/*.ps1",
+               "to": "${backupRoot}/build-tools"
+            },
+            {
+               "from": "${projectRootDir}/.vscode/*.json",
+               "to": "${backupRoot}/vscode"
+            },
+            {
+               "from": "${projectRootDir}/*.json",
+               "to": "${backupRoot}/projectFiles"
+            }
+         ],
+         "postBuildBackup": []
+      }
+   },
+   "prod": {
+      "rootpaths": {
+         "projectRootDir": "D:/dev/SharePoint/SPTools",
+         "copyTargetRootDir": "C:/Users/Mitch/California Department of Water Resources/Change Advisory Board - Site Assets/SPTools",
+         "backupRoot": "${copyTargetRootDir}/Backup"
+      },
+      "specialFiles:" : {
+         "lastCompileDateFileName": "lastCompileTime.txt"
+      },
+      "source": {
+         "entryFile": {
+            "path": "${projectRootDir}/src/SPTools.aspx",
+            "variableValues": [
+               { "variableName": "SPREST_FolderPath", "value": "/js/SPREST" },
+               { "variableName": "SPTOOLS_JS_FolderPath", "value": "/js" },
+               { "variableName": "CSS_FolderPath", "value": "/css" }
+            ]
+         },
+         "tsFiles": {
+            "tsconfigJsonPath": "${projectRootDir}/tsconfig.json",
+            "transpiledSameFolder": true,
+            "pathsAndCopyTargets": [
+               { "sourceRelativePath": "/src/ts", "copyTargetRelativePath": "" },
+               { "sourceRelativePath": "/SPREST/src", "copyTargetRelativePath": "/SPREST" }
+            ]
+         },
+         "otherSourceFiles": [
+            {
+               "path": "${projectRootDir}/src",
+               "fName": "*.css",
+               "localFinalCopyPath": "${projectRootDir}/out/css",
+               "copyTargetRelativePath": "/css"
+            },
+            {
+               "path": "${projectRootDir}/src",
+               "fName": "*.aspx",
+               "localFinalCopyPath": "${projectRootDir}/out",
+               "copyTargetRelativePath": "."
+            }
+         ]
+      },
+      "backup": {
+         "preBuildBackup": [
+            {
+               "from": "${projectRootDir}/build-tools/*.ps1",
+               "to": "${backupRoot}/build-tools"
+            },
+            {
+               "from": "${projectRootDir}/.vscode/*.json",
+               "to": "${backupRoot}/vscode"
+            },
+            {
+               "from": "${projectRootDir}/*.json",
+               "to": "${backupRoot}/projectFiles"
+            }
+         ],
+         "postBuildBackup": []
+      }
+   }
+}
