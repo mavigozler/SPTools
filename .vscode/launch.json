@@ -12,12 +12,22 @@
          "cwd": "${workspaceFolder}"
       },
       {
-         "name": "Build SPTools",
+         "name": "Build SPTools DEV Config",
          "type": "PowerShell",
          "request": "launch",
          "script": "${workspaceFolder}/build-tools/buildSPToolsV2.ps1",
          "args": [
             "-Env", "dev"
+         ],
+         "cwd": "${workspaceFolder}"
+      },
+      {
+         "name": "Build SPTools with CLEAN, DEV Config",
+         "type": "PowerShell",
+         "request": "launch",
+         "script": "${workspaceFolder}/build-tools/buildSPToolsV2.ps1",
+         "args": [
+            "-Env", "dev", "-Clean"
          ],
          "cwd": "${workspaceFolder}"
       }

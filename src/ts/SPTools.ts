@@ -1,5 +1,11 @@
 "use strict";
 
+import { SPSiteREST } from '../../SPREST/src/SPSiteREST';
+import { SPListREST } from '../../SPREST/src/SPListREST';
+import * as SPRESTTypes from '../../SPREST/src/SPRESTtypes';
+import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
+import { listingOp } from './liblisting';
+
 type TShortFieldInfo = {
    id: string;
    name: string;
@@ -57,7 +63,7 @@ let lastMenuSelect: HTMLSelectElement,
          nonBaseFieldsInfo: TShortFieldInfo[];
       };
 
-function displayPage(which: string): void {
+export function displayPage(which: string): void {
    document.getElementById(CurrentPageId)!.style.display = "none";
    document.getElementById(CurrentPageId = which)!.style.display = "block";
 }
@@ -72,8 +78,8 @@ function initializeTab(tabName: string): void {
       temp: string,
       oNode: HTMLOptionElement,
       form: HTMLFormElement = document.getElementById("main-form") as HTMLFormElement,
-      parsedUrl: TParsedURL | null = ParseSPUrl(location.href),
-      spServerREST: SPServerREST = new SPServerREST({
+      parsedUrl: SPRESTTypes.TParsedURL | null = SPRESTSupportLib.ParseSPUrl(location.href),
+      spServerREST: SPRESTSupportLib.SPServerREST = new SPRESTSupportLib.SPServerREST({
          URL: parsedUrl!.server
       }),
       selectObj: HTMLSelectElement,
@@ -152,7 +158,7 @@ function initializeTab(tabName: string): void {
 // SITE panel build
    //   if (CurrentSite && CurrentSite.initialized && CurrentSite.initialized == true)
    //      return;
-      if ((parsedUrl = ParseSPUrl(form["site-name"].value)) == null)
+      if ((parsedUrl = SPRESTSupportLib.ParseSPUrl(form["site-name"].value)) == null)
          throw "no url";
       if ((spSiteREST = new SPSiteREST({
          server: parsedUrl.server,
@@ -299,7 +305,7 @@ function initializeTab(tabName: string): void {
       break;
    case "list":
 // list panel build
-      if ((parsedUrl = ParseSPUrl(form["site-name"].value)) == null)
+      if ((parsedUrl = SPRESTSupportLib.ParseSPUrl(form["site-name"].value)) == null)
          throw "this error";
       selectObj = form["site-lists2"];
       if (selectObj.selectedIndex < 0)
@@ -385,13 +391,13 @@ function initializeTab(tabName: string): void {
             while (fieldSelectorPNode.firstChild)
                fieldSelectorPNode.removeChild(fieldSelectorPNode.firstChild);
             // build new one
-            buildSelectSet(
+            SPRESTSupportLib.buildSelectSet(
                fieldSelectorPNode,
                "listcopyfieldsselect",
                options,
                5,
                5,
-               (event) => {  // update field selector
+               (event: Event) => {  // update field selector
                   let field: any,
                      mainNode = document.querySelector("#selections tbody") as HTMLTableSectionElement,
                      trNode: HTMLTableRowElement,
@@ -672,8 +678,8 @@ function expandProp(
    if (!parts[3])
       return;
    if (which == "server") {
-      let spServerREST = new SPServerREST({
-         URL: ParseSPUrl(location.href)!.server
+      let spServerREST = new SPRESTSupportLib.SPServerREST({
+         URL: SPRESTSupportLib.ParseSPUrl(location.href)!.server
       });
 
       spServerREST.getEndpoint(
@@ -692,7 +698,7 @@ function expandProp(
             errorSet.replaceChild(document.createTextNode(response.text), errorSet.firstChild as ChildNode);
       });
    } else if (which == "site") {
-      let parsedUrl = ParseSPUrl(form["site-name"].value) as TParsedURL,
+      let parsedUrl = SPRESTSupportLib.ParseSPUrl(form["site-name"].value) as SPRESTTypes.TParsedURL,
             spSiteREST = new SPSiteREST({
                server: parsedUrl.server,
                site: parsedUrl.siteFullPath
@@ -839,10 +845,10 @@ function fetchListItemId(
 $(() => {
    let queryParts: URLSearchParams = new URLSearchParams(location.search);
 
-   theForm = document.getElementById('theForm') as HTMLFormElement;
+   let SPToolsForm = document.getElementById('SPToolsForm') as HTMLFormElement;
    CurrentPageId = "container";
    if (queryParts.get("listingfunc") != null)
-      listingOp(queryParts, theForm);
+      listingOp(queryParts, SPToolsForm);
    else
       selectMenu(document.getElementById("server-button") as HTMLSpanElement);
 });

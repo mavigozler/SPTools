@@ -1,5 +1,11 @@
 "use strict";
 
+import { SPSiteREST } from '../../SPREST/src/SPSiteREST';
+import { SPListREST } from '../../SPREST/src/SPListREST';
+import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
+import * as SPRESTTypes from '../../SPREST/src/SPRESTtypes';
+import * as SPTools from './SPTools';
+
 const SERVER_NAME = location.origin,
     SITE_NAME = "/teams/swp-dom/RSO/CPR",
     apiPrefix = SERVER_NAME + SITE_NAME + "/_api",
@@ -10,7 +16,7 @@ const SERVER_NAME = location.origin,
 	SORT_LISTING_BY_ID = 0x0008,
 	ROW_NUMBERING = 0x0010;
 
-let theForm: HTMLFormElement,
+export let LibListingForm: HTMLFormElement,
     SiteUrl: string,
 	 ListingOptions: number = 0x0000;
 
@@ -81,16 +87,16 @@ function simplifyFileSize(size: number): string | undefined {
    	return (size / 1024).toFixed(0).toString() + " KB";
 }
 
-function listingOp(
+export function listingOp(
 	which: string | URLSearchParams,
-	theForm: HTMLFormElement
+	LibListingForm: HTMLFormElement
 ): void {
 	let siteREST: SPSiteREST,
 			value: string | null,
          listingFunc: string | null = null,
          queryParts: URLSearchParams | null = null,
          insertionPoint: HTMLDivElement,
-         parentNode: HTMLElement = theForm.parentNode! as HTMLElement,
+         parentNode: HTMLElement = LibListingForm.parentNode! as HTMLElement,
 			options: TListingOptions = {},
 			dpage: string | null;
 
@@ -102,7 +108,7 @@ function listingOp(
       if (listingFunc == null)
          return alert("The use of a URL to invoke functionality requires that 'listingfunc' name be set with a valid value");
       if ((value = queryParts.get("displaypage")) != null)
-         displayPage(value);
+         SPTools.displayPage(value);
    }
 
    insertionPoint = parentNode.appendChild(document.createElement("div"));
@@ -118,28 +124,28 @@ function listingOp(
          );
       else
          findFileDifferences(
-            theForm.Lib1SitePath.value,
-            theForm.Lib1Name.value,
-            theForm.Lib2SitePath.value,
-            theForm.Lib2Name,
+            LibListingForm.Lib1SitePath.value,
+            LibListingForm.Lib1Name.value,
+            LibListingForm.Lib2SitePath.value,
+            LibListingForm.Lib2Name,
             insertionPoint
          );
       break;
    case "duplicatelisting":
       if (queryParts) {
-         theForm.SiteNameDuplicates.value =  queryParts.get("sitenamedups");
-         theForm.LibraryNameDuplicates.value = queryParts.get("libnamedups");
+         LibListingForm.SiteNameDuplicates.value =  queryParts.get("sitenamedups");
+         LibListingForm.LibraryNameDuplicates.value = queryParts.get("libnamedups");
          if (duplicateListing(
-            theForm.SiteNameDuplicates.value,
-            theForm.LibraryNameDuplicates.value,
+            LibListingForm.SiteNameDuplicates.value,
+            LibListingForm.LibraryNameDuplicates.value,
             insertionPoint
          ) == false)
             return alert("To use duplicate listing function, the query string must be of the form " +
                   "'?callfunc=DuplicateListing&siteURL=<site-url>&libName=<lib-name>&displaypage=liblist-container'");
       } else {
          if (duplicateListing(
-            theForm.SiteNameDuplicates.value,
-            theForm.LibraryNameDuplicates.value,
+            LibListingForm.SiteNameDuplicates.value,
+            LibListingForm.LibraryNameDuplicates.value,
             insertionPoint
          ) == false)
             return alert("To use duplicate listing function, the query string must be of the form " +
@@ -179,11 +185,11 @@ function listingOp(
 		break;
    case "listfoldersandfiles":
       if (queryParts) {
-         theForm.SiteNameDuplicates.value =  queryParts.get("siteurl");
-         theForm.LibraryNameDuplicates.value = queryParts.get("libname");
+         LibListingForm.SiteNameDuplicates.value =  queryParts.get("siteurl");
+         LibListingForm.LibraryNameDuplicates.value = queryParts.get("libname");
          listFoldersAndFiles(
-            theForm.SiteNameDuplicates.value,
-            theForm.LibraryNameDuplicates.value,
+            LibListingForm.SiteNameDuplicates.value,
+            LibListingForm.LibraryNameDuplicates.value,
             insertionPoint
          );
       }
@@ -206,44 +212,44 @@ function generateURL(which: string): void {
       noQueryLocation: string = queryPos > 0 ? location.href.substring(0, queryPos) : location.href;
    switch (which) {
    case "dupOrFolderFiles":
-      if (theForm.dupOrFolderFiles.value == "dups")
-         theForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=duplicateListing&sitenamedups=" +
-               encodeURIComponent(theForm.SiteNameDuplicates.value) +
-               "&libnamedups=" + encodeURIComponent(theForm.LibraryNameDuplicates.value) +
+      if (LibListingForm.dupOrFolderFiles.value == "dups")
+         LibListingForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=duplicateListing&sitenamedups=" +
+               encodeURIComponent(LibListingForm.SiteNameDuplicates.value) +
+               "&libnamedups=" + encodeURIComponent(LibListingForm.LibraryNameDuplicates.value) +
                "&displaypage=liblist-container";
-      else if (theForm.dupOrFolderFiles.value == "folderfiles")
-         theForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=listFoldersAndFiles&siteurl=" +
-               encodeURIComponent(theForm.SiteNameDuplicates.value) +
-               "&libname=" + encodeURIComponent(theForm.LibraryNameDuplicates.value) +
+      else if (LibListingForm.dupOrFolderFiles.value == "folderfiles")
+         LibListingForm.duplicatesGenUrl.value = noQueryLocation + "?listingfunc=listFoldersAndFiles&siteurl=" +
+               encodeURIComponent(LibListingForm.SiteNameDuplicates.value) +
+               "&libname=" + encodeURIComponent(LibListingForm.LibraryNameDuplicates.value) +
                "&displaypage=liblist-container";
       break;
    case "copylib":
-      theForm.copyingGenUrl.value = noQueryLocation + "?listingfunc=makelibcopy&sourcesitecopy=" +
-            encodeURIComponent(theForm.SourceSiteCopy.value) +
-            "&sourcenamecopy=" + encodeURIComponent(theForm.SourceSiteCopy.value) +
-            "&destsitecopy=" + encodeURIComponent(theForm.DestSiteCopy.value) +
-            "&destnamecopy=" + encodeURIComponent(theForm.DestNameCopy.value) +
+      LibListingForm.copyingGenUrl.value = noQueryLocation + "?listingfunc=makelibcopy&sourcesitecopy=" +
+            encodeURIComponent(LibListingForm.SourceSiteCopy.value) +
+            "&sourcenamecopy=" + encodeURIComponent(LibListingForm.SourceSiteCopy.value) +
+            "&destsitecopy=" + encodeURIComponent(LibListingForm.DestSiteCopy.value) +
+            "&destnamecopy=" + encodeURIComponent(LibListingForm.DestNameCopy.value) +
             "&displaypage=liblist-container";
       break;
    case "filediff":
-      theForm.filediffGenUrl.value = noQueryLocation + "?listingfunc=findfilediff&lib1sitepath=" +
-            encodeURIComponent(theForm.Lib1SitePath.value) +
-            "&lib1name=" + encodeURIComponent(theForm.Lib1Name.value) +
-            "&lib2sitepath=" + encodeURIComponent(theForm.Lib2SitePath.value) +
-            "&lib2name=" + encodeURIComponent(theForm.Lib2Name.value) +
+      LibListingForm.filediffGenUrl.value = noQueryLocation + "?listingfunc=findfilediff&lib1sitepath=" +
+            encodeURIComponent(LibListingForm.Lib1SitePath.value) +
+            "&lib1name=" + encodeURIComponent(LibListingForm.Lib1Name.value) +
+            "&lib2sitepath=" + encodeURIComponent(LibListingForm.Lib2SitePath.value) +
+            "&lib2name=" + encodeURIComponent(LibListingForm.Lib2Name.value) +
             "&displaypage=liblist-container";
       break;
    case "liblisting":
-      theForm.generatedUrl.value = noQueryLocation +
-            "?listingfunc=customlisting&csiteurl=" + encodeURIComponent(theForm.clistingSiteUrl.value) +
-            "&clibname=" + encodeURIComponent(theForm.clistingListName.value) +
-            ((theForm.date.valueAsDate != null) ? ("&date=".concat(theForm.date.valueAsDate.toISOString())) : "") +
-            ((theForm.displaytype.value != "") ? ("&dateType=".concat(theForm.displaytype.value)) : "") +
-            ((theForm.datecutoff.value != "") ? ("&dateBorder=".concat(theForm.datecutoff.value)) : "") +
-            (theForm.versioning.checked == true ? "&versioning=true" : "") +
-            (theForm.listFilesOnly.checked == true ? "&listFilesOnly=true" : "") +
-            (theForm.includeId.checked == true ? "&includeId=true" : "");
-      theForm.generatedUrl.style.display = "inline";
+      LibListingForm.generatedUrl.value = noQueryLocation +
+            "?listingfunc=customlisting&csiteurl=" + encodeURIComponent(LibListingForm.clistingSiteUrl.value) +
+            "&clibname=" + encodeURIComponent(LibListingForm.clistingListName.value) +
+            ((LibListingForm.date.valueAsDate != null) ? ("&date=".concat(LibListingForm.date.valueAsDate.toISOString())) : "") +
+            ((LibListingForm.displaytype.value != "") ? ("&dateType=".concat(LibListingForm.displaytype.value)) : "") +
+            ((LibListingForm.datecutoff.value != "") ? ("&dateBorder=".concat(LibListingForm.datecutoff.value)) : "") +
+            (LibListingForm.versioning.checked == true ? "&versioning=true" : "") +
+            (LibListingForm.listFilesOnly.checked == true ? "&listFilesOnly=true" : "") +
+            (LibListingForm.includeId.checked == true ? "&includeId=true" : "");
+      LibListingForm.generatedUrl.style.display = "inline";
       break;
    }
 }
@@ -264,7 +270,7 @@ function duplicateListing(
    leadingPath = leadingPath[1] as string;
 
    document.getElementById("working")!.style.display = "inline-block";
-   RESTrequest({
+   SPRESTSupportLib.RESTrequest({
       url: siteName + "/_api/web/lists/getByTitle('" + libName + "')/items" +
           "?$select=" + select + "&$expand=" + expand,
       method: "GET",
@@ -385,7 +391,7 @@ function duplicateListing(
          });
          document.getElementById("working")!.style.display = "none";
       },
-      errorCallback: (reqObj) => {
+      errorCallback: (reqObj: JQueryXHR) => {
          alert("Error on library request:\n\n" +
             JSON.stringify(reqObj, null, "  "));
       }
@@ -400,25 +406,25 @@ function errorInput(message: string): void {
 function copyLibrary() {
     let srcSiteREST: SPSiteREST, destSiteREST: SPSiteREST;
 
-    if (theForm.SourceSiteCopy.value.length == 0)
+    if (LibListingForm.SourceSiteCopy.value.length == 0)
         return errorInput("Missing valid path URL to site for source library to be copied");
-    if (theForm.SourceNameCopy.value.length == 0)
+    if (LibListingForm.SourceNameCopy.value.length == 0)
         return errorInput("Missing valid name for source library to be copied");
-    if (theForm.DestSiteCopy.value.length == 0)
+    if (LibListingForm.DestSiteCopy.value.length == 0)
         return errorInput("Missing valid path URL to site for destination library for copy");
-    if (theForm.DestNameCopy.value.length == 0)
+    if (LibListingForm.DestNameCopy.value.length == 0)
         return errorInput("Missing valid name for destination library for copy");
     srcSiteREST = new SPSiteREST({
-        server: ParseSPUrl(location.origin)!.server,
-        site: theForm.SourceSiteCopy.value
+        server: SPRESTSupportLib.ParseSPUrl(location.origin)!.server,
+        site: LibListingForm.SourceSiteCopy.value
      });
     if (srcSiteREST == null)
         return errorInput("Problem with information on the source site. Check your entries");
     srcSiteREST.init().then(() => {
         srcSiteREST.makeLibCopyWithItems(
-           theForm.SourceNameCopy.value,
-           theForm.DestSiteCopy.value,
-           theForm.DestNameCopy.value
+           LibListingForm.SourceNameCopy.value,
+           LibListingForm.DestSiteCopy.value,
+           LibListingForm.DestNameCopy.value
         ).then((response) => {
            alert("Success: " + response);
         }).catch((response) => {
@@ -455,7 +461,7 @@ function findFileDifferences(
         return errorInput("Missing valid path URL to site for library 2");
     if (lib2Name.length == 0)
         return errorInput("Missing valid name for library 2");
-    RESTrequest({
+    SPRESTSupportLib.RESTrequest({
         url: lib1SitePath + "/_api/web/lists/getByTitle('" + lib1Name +  "')/items" +
             "?$select=" + selectExpr + "&$expand=" + expandExpr,
         method: "GET",
@@ -512,15 +518,15 @@ function findFileDifferences(
             L1Folders.sort((a: any, b: any) => {
                return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
            });
-           RESTrequest({
-            url: theForm.Lib2SitePath.value + "/_api/web/lists/getByTitle('" + theForm.Lib2Name.value +  "')/items" +
+           SPRESTSupportLib.RESTrequest({
+            url: LibListingForm.Lib2SitePath.value + "/_api/web/lists/getByTitle('" + LibListingForm.Lib2Name.value +  "')/items" +
                   "?$select=" + selectExpr + "&$expand=" + expandExpr,
                  method: "GET",
                 headers: {
                     "Accept": "application/json;odata=verbose",
                     "Content-Type": "application/json;odata=verbose",
                 },
-                successCallback: (data: TSPResponseData/*, text, reqObj */) => {
+                successCallback: (data: SPRESTTypes.TSPResponseData/*, text, reqObj */) => {
                   let   L2Files: libItem[] = [],
                         L2Folders: libItem[] = [],
    //                     checkTag: string,
@@ -593,7 +599,7 @@ function findFileDifferences(
                            (item) => { return new Date(item.modified).toLocaleDateString() },
                          ],
                         data: combined,
-                        attach: theForm,
+                        attach: LibListingForm,
                         options: ["addCounter{1}"]
                      });
                      return;
@@ -819,7 +825,7 @@ function listFoldersAndFiles(
    leadingPath = leadingPath[1] as string;
 
    document.getElementById("working")!.style.display = "inline-block";
-   RESTrequest({
+   SPRESTSupportLib.RESTrequest({
       url: siteName + "/_api/web/lists/getByTitle('" + libName + "')/items" +
       "?$select=" + select + "&$expand=" + expand,
       method: "GET",
@@ -1029,7 +1035,7 @@ function listFoldersAndFiles(
 
 /*
 function ReliabilityStandardValuesCheck() {  // provides listing of Reliability STd column multiple values and counnts
-    RESTrequest({
+    SPRESTSupportLib.RESTrequest({
         url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/CPR/_api/web/lists/getByTitle('O&P Evidence_Copy')/items" +
             "?$select=Id,Reliability_x0020_Standard,FileSystemObjectType",
         method: "GET",
@@ -1050,7 +1056,7 @@ function ReliabilityStandardValuesCheck() {  // provides listing of Reliability 
                 missingIds: number[] = [],
                 arr: string | RegExpMatchArray | Set<any> | any[] | null,
 				multCountDiffVals: number = 0,
-                parentNode = theForm as HTMLFormElement;
+                parentNode = LibListingForm as HTMLFormElement;
 
             pNode = document.createElement("p");
             parentNode.appendChild(pNode);
@@ -1412,7 +1418,7 @@ function customListing() {
 }
 
 function updateListing(options?: TListingOptions) {
-   const form: HTMLFormElement = document.getElementById("theForm") as HTMLFormElement;
+   const form: HTMLFormElement = document.getElementById("LibListingForm") as HTMLFormElement;
    let url: string,
       filter: string = "",
 		libName: string = form.clistingListName.value,
@@ -1472,7 +1478,7 @@ function updateListing(options?: TListingOptions) {
 	url = SiteUrl + "/_api/web/lists/getByTitle('" + libName + "')/items?" +
 			itemsSelect + "&" + itemsExpand + (filter.length > 0 ? "&" + filter : "");
 	//progressAlert("show");
-   RESTrequest({
+   SPRESTSupportLib.RESTrequest({
    	url: url,
       method: "GET",
       	successCallback: (data) => {
@@ -1936,7 +1942,7 @@ function listByFolderGrouping(
 }
 
 function dataTransformer() {
-    RESTrequest({
+    SPRESTSupportLib.RESTrequest({
         url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                             "getByTitle('PSMP_dev')?$expand=ContentTypes&$select=ContentTypes/Id/StringValue,ContentTypes/Name",
         method: "GET",
@@ -1956,7 +1962,7 @@ function dataTransformer() {
                     id: result.Id.StringValue
                 });
             }
-            RESTrequest({
+            SPRESTSupportLib.RESTrequest({
                 url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                             "getByTitle('PSMP_dev')/items?$select=Id,Level_x0020_1,File/Name" +
                             ((DocumentContentTypeId != null) ? "&$filter=ContentTypeId eq '" + DocumentContentTypeId + "'" : "") +
@@ -1977,7 +1983,7 @@ function dataTransformer() {
                                 break;
                         console.log("modifying file '" + results[idx].File.Name + "'");
                         setTimeout(() => {
-                            RESTrequest({
+                            SPRESTSupportLib.RESTrequest({
                                 setDigest: true,
                                 url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                                         "getByTitle('PSMP_dev')/items(" + results[idx].Id + ")",
@@ -1986,7 +1992,7 @@ function dataTransformer() {
                                     "X-HTTP-METHOD": "MERGE",
 					                "IF-MATCH": "*"
                                 },
-                                data: formatRESTBody({
+                                data: SPRESTSupportLib.formatRESTBody({
                                     "ListItemEntityTypeFullName": "SP.Data.PSMP_x005f_DevItem",
                                     "ContentTypeId": ctype.id
                                 }),

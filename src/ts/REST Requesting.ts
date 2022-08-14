@@ -1,9 +1,12 @@
 "use strict";
 
+import * as SPRESTTypes from '../../SPREST/src/SPRESTtypes';
+import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
+
 const prefix = "WPQ5",
 	stdHeaders =  {
 		"Content-Type":"application/json;odata=verbose",
-		"Accept":"application/json;odata=verbose" 
+		"Accept":"application/json;odata=verbose"
   };
 
 let SPChromePrefix = "";
@@ -15,7 +18,7 @@ function formatDate(form: HTMLFormElement) {
 }
 
 function recordHttpStatusResponseDateUrlMethod(reqObj: JQueryXHR) {
-	let node: HTMLSpanElement, 
+	let node: HTMLSpanElement,
 		responseDate: Date = new Date(reqObj.getResponseHeader("date") as string);
 
 	node = document.getElementById('http-status') as HTMLSpanElement;
@@ -28,22 +31,22 @@ function recordHttpStatusResponseDateUrlMethod(reqObj: JQueryXHR) {
 }
 
 function sendRequest(form: HTMLFormElement) {
-	let node: HTMLElement, 
-		value: string, 
-		headers: { [key:string]: string } = { }, 
-		hName: string, 
+	let node: HTMLElement,
+		value: string,
+		headers: { [key:string]: string } = { },
+		hName: string,
 		formDigestValueNode: HTMLElement,
-		finalUrl: string = form[SPChromePrefix + "url"].value, 
+		finalUrl: string = form[SPChromePrefix + "url"].value,
 		query: string = "",
 		headersCount: number = parseInt(form[SPChromePrefix + "headerCount"].value);
 
 	function editedRequest(params: {
 		url: string;
-		method: THttpRequestMethods;
-		headers: THttpRequestHeaders;
+		method: SPRESTTypes.THttpRequestMethods;
+		headers: SPRESTTypes.THttpRequestHeaders;
 		body: string;
 	}): void {
-		RESTrequest({
+		SPRESTSupportLib.RESTrequest({
 			url: params.url,
 			method: params.method!,
 			headers: params.headers,
@@ -55,7 +58,7 @@ function sendRequest(form: HTMLFormElement) {
 				loadPreviousData();
 			},
 			errorCallback: (reqObj, status, errThrown) => {
-				form[SPChromePrefix + "response"].value = 
+				form[SPChromePrefix + "response"].value =
 					"URL: " + //this.url +
 					"\nError thrown: " + errThrown +
 					"\nstatus: " + status;
@@ -68,7 +71,7 @@ function sendRequest(form: HTMLFormElement) {
 			}
 		});
 	}
-	
+
 	if ((value = form[SPChromePrefix + "ODataSelect"].value).length > 0)
 		query += "?$select=" + value;
 	if ((value = form[SPChromePrefix + "ODataFilter"].value).length > 0)
@@ -89,24 +92,24 @@ function sendRequest(form: HTMLFormElement) {
 	if (form[SPChromePrefix + "xdigest"].checked == true) {
 		let match: RegExpMatchArray | null = finalUrl.match(/(.*\/_api)/);
 
-		RESTrequest({
+		SPRESTSupportLib.RESTrequest({
 			url: match![1] + "/contextinfo",
 			method: "POST",
-			headers: {...stdHeaders} as THttpRequestHeaders,
+			headers: {...stdHeaders} as SPRESTTypes.THttpRequestHeaders,
 			successCallback: function (data) {
 				let formDigestValue = data.d!.GetContextWebInformation!.FormDigestValue;
-					// SharePoint 
+					// SharePoint
 				headers["X-RequestDigest"] = formDigestValue;
 				(formDigestValueNode as HTMLInputElement).value = formDigestValue;
 				editedRequest({
 					url: finalUrl,
-					method: getCheckedInput(form[SPChromePrefix + "method"]) as THttpRequestMethods,
+					method: SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]) as SPRESTTypes.THttpRequestMethods,
 					headers: headers,
 					body: form[SPChromePrefix + "body"].value
 				});
 			},
 			errorCallback: function(reqObj, status, errThrown) {
-				form[SPChromePrefix + "response"].value = 
+				form[SPChromePrefix + "response"].value =
 					"URL: " + this.url +
 					"\nError thrown: " + errThrown +
 					"\nstatus: " + status;
@@ -121,7 +124,7 @@ function sendRequest(form: HTMLFormElement) {
 	} else
 		editedRequest({
 			url: finalUrl,
-			method: getCheckedInput(form[SPChromePrefix + "method"]) as THttpRequestMethods,
+			method: SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]) as SPRESTTypes.THttpRequestMethods,
 			headers: headers,
 			body: form[SPChromePrefix + "body"].value
 		});
@@ -142,10 +145,10 @@ function hideHeaderSet() {
 }
 
 function deleteHeader(
-	hName: string, 
+	hName: string,
 	buttonObj: HTMLButtonElement | {form: HTMLFormElement}
 ): number {
-	let node: HTMLInputElement = buttonObj.form![SPChromePrefix + hName + "-name"], 
+	let node: HTMLInputElement = buttonObj.form![SPChromePrefix + hName + "-name"],
 		headersCount = parseInt(buttonObj.form![SPChromePrefix + "headerCount"].value) - 1;
 	if (node.value == "X-RequestDigest")
 		buttonObj.form![SPChromePrefix + "xdigest"].checked = false;
@@ -161,12 +164,12 @@ function deleteHeader(
 }
 
 function addHeader(
-	buttonObj: HTMLButtonElement | HTMLInputElement, 
+	buttonObj: HTMLButtonElement | HTMLInputElement,
 	definedHeaderData: {[key:string]: string | boolean | null}
 ) {
 	const headersNode = document.getElementById("headers") as HTMLDivElement;
-	let sNode: HTMLSpanElement, 
-		node: HTMLInputElement | HTMLButtonElement, 
+	let sNode: HTMLSpanElement,
+		node: HTMLInputElement | HTMLButtonElement,
 		headersCount = parseInt(buttonObj.form![SPChromePrefix + "headerCount"].value) + 1;
 
 	sNode = document.createElement("span");
@@ -215,23 +218,23 @@ function setupMethod(inputObj: any, fromXDigest: boolean = false): number {
 		postHeaders: {
 			name: string; value: string | null
 		}[] = [
-			{ name: "X-HTTP-METHOD", value: 
+			{ name: "X-HTTP-METHOD", value:
 				"[ {\"method\": \"DELETE\", \"value\": \"DELETE\"}, " +
 				"  {\"method\": \"POST\", \"value\": \"MERGE\" }, " +
 				"  {\"method\": \"PUT\", \"value\": \"MERGE\" } ]" },
 			{ name: "IF-MATCH", value: "*"},
 			{ name: "X-RequestDigest", value: null}
 		];
-	let value: string | null, 
-			hName: string | null = null, 
-			hValue: string | null = null, 
+	let value: string | null,
+			hName: string | null = null,
+			hValue: string | null = null,
 			json: {value: string; method: string}[],
 			headersCount: number = parseInt(inputObj.form[SPChromePrefix + "headerCount"].value);
-		
+
 	if (fromXDigest == true)
 		value = inputObj.value;
 	else
-		value = getCheckedInput(form[SPChromePrefix + "method"]) as string;
+		value = SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]) as string;
 	if (value == "POST") { // creation of headers
 		for (let i = 0; i < postHeaders.length; i++) {
 			if (postHeaders[i].name == "X-HTTP-METHOD") {
@@ -275,13 +278,13 @@ function setupMethod(inputObj: any, fromXDigest: boolean = false): number {
 function setupXDigest(inputObj: HTMLInputElement) {
 	const form = inputObj.form as HTMLFormElement,
 //		headersNode: HTMLElement = document.getElementById("headers"),
-		selectedMethod = getCheckedInput(form[SPChromePrefix + "method"]);
+		selectedMethod = SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]);
 
-	let node: HTMLElement, 
+	let node: HTMLElement,
 		headersCount: number = 0;
 
 	if (inputObj.checked == false) {
-		let i: number, 
+		let i: number,
 			headerName: string;
 
 		for (i = 0; i < headersCount; i++) {
@@ -310,10 +313,10 @@ function setupXDigest(inputObj: HTMLInputElement) {
 }
 
 function storeRequestData(form: HTMLFormElement) {
-	let reqtable: string[] | string | null, 
+	let reqtable: string[] | string | null,
 		data = JSON.stringify({
             url: form[SPChromePrefix + "url"].value,
-            method: getCheckedInput(form[SPChromePrefix + "method"]),
+            method: SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]),
             select: form[SPChromePrefix + "ODataSelect"].value,
             filter: form[SPChromePrefix + "ODataFilter"].value,
             expand: form[SPChromePrefix + "ODataExpand"].value,
@@ -330,10 +333,10 @@ function storeRequestData(form: HTMLFormElement) {
 }
 
 function loadPreviousData() {
-	let node: HTMLOptionElement, 
-		reqtable = JSON.parse(localStorage.getItem("PreviousRequests") as string), 
+	let node: HTMLOptionElement,
+		reqtable = JSON.parse(localStorage.getItem("PreviousRequests") as string),
 		selectObj = document.getElementById("previousRequest") as HTMLSelectElement;
-	
+
 	if (reqtable)
 		for (let data of reqtable) {
 			node = document.createElement("option");
@@ -346,9 +349,9 @@ function loadPreviousData() {
 function fillPrevious(selectObj: HTMLSelectElement) {
 	let form = selectObj.form as HTMLFormElement,
 		data = JSON.parse(selectObj.options[selectObj.selectedIndex].value);
-	
+
 	form[SPChromePrefix + "url"].value = data.url;
-	setCheckedInput(form[SPChromePrefix + "method"], data.method);
+	SPRESTSupportLib.setCheckedInput(form[SPChromePrefix + "method"], data.method);
 	form[SPChromePrefix + "ODataSelect"].value = data.select;
 	form[SPChromePrefix + "ODataFilter"].value = data.filter;
 	form[SPChromePrefix + "ODataExpand"].value = data.expand;
@@ -356,7 +359,7 @@ function fillPrevious(selectObj: HTMLSelectElement) {
 }
 
 function renderObjectInMarkup(response: any) {
-	
+
 }
 
 // initialize
@@ -374,5 +377,5 @@ $(document).ready(function () {
  *     low =  (unicode value - 0x10000) % 0x400 + 0xdc00
  *  Back calcualtion
  *     unicode value = (high - 0xd800) * 0x400 + (low - 0xdc00) + 0x10000
- * 
+ *
  *************************************************************/

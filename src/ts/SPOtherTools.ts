@@ -1,7 +1,12 @@
 
 "use strict";
 /* jshint -W069 */
-const          
+
+import { SPListREST } from '../../SPREST/src/SPListREST';
+import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
+import { SiteUrl } from './liblisting';
+
+const
    server = "https://cawater.sharepoint.com",
    site = "/teams/comm-cpr",
    list = "O&P Evidence_Copy",
@@ -21,10 +26,10 @@ function specialMetadataCopy(): void {
       let requests: {
          url: string;
          body: any
-      }[] = [], 
-         body: any, 
-         property: string, 
-         value: RegExpMatchArray | null, 
+      }[] = [],
+         body: any,
+         property: string,
+         value: RegExpMatchArray | null,
          standardRE: RegExp = /[A-Z]{3}\-\d{3}/;
 
       if (Array.isArray(items) == false)
@@ -56,7 +61,7 @@ function specialMetadataCopy(): void {
             body: body
          });
       }
-      batchRequestingQueue({
+      SPRESTSupportLib.batchRequestingQueue({
          AllMethods: "PATCH",
          AllHeaders: {
             "Content-Type": "application/json;odata=verbose",
@@ -83,10 +88,10 @@ function getBatchResults() {
 
    for (let i = 0; i < 25; i++)
       requests.push({
-         url: server + site + "/_api/web/lists/getByTitle('" + list + "')/items(" + 
+         url: server + site + "/_api/web/lists/getByTitle('" + list + "')/items(" +
                (Math.random() * 5000) + ")"
-      });  
-   batchRequestingQueue({
+      });
+      SPRESTSupportLib.batchRequestingQueue({
       AllMethods: "GET",
       AllHeaders: {
          "Accept": "application/json;odata=verbose",
@@ -100,9 +105,9 @@ function getBatchResults() {
       console.log(response);
    });
 }
-   
+
 function copylist(buttonObj: HTMLButtonElement) {
-   let form = buttonObj.form as HTMLFormElement, 
+   let form = buttonObj.form as HTMLFormElement,
       selectObj: HTMLSelectElement = form["site-lists2"];
 /*
    CurrentSite.restInterface.makeLibCopyWithItems(
@@ -110,26 +115,26 @@ function copylist(buttonObj: HTMLButtonElement) {
       form.newCopyName.value,
       parseInt(form.itemsToCopy.value)
    ).then(() => {
-      
+
    }).catch(() => {
-   
+
    }); */
 }
 
 function copyFiles() {
-   RESTrequest({
+   SPRESTSupportLib.RESTrequest({
          url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/getByTitle('PSMP')" +
                "/items/?$filter=Created ge datetime'2021-02-18T08:00:00.000Z'&$expand=File",
          method: "GET",
          successCallback: (data: any) => {
-            let folNames: RegExpMatchArray, 
+            let folNames: RegExpMatchArray,
                fileData: {
                   name: string;
                   folderRelativeUrl: string;
                   fileRelativeUrl: string;
                   metadata: string;
-               }[] = [ ], 
-               metadata: {[key:string]: string}, 
+               }[] = [ ],
+               metadata: {[key:string]: string},
                formattedMetadata: string,
                item: any,
                newUrlPrefix =  "https://cawater.sharepoint.com/teams/swp-dom/RSO/Test";
@@ -145,7 +150,7 @@ function copyFiles() {
                      folNames[i] = folNames[i].match(/[\d\.]+\s*\-\s*(.*)/)![1];
                      metadata["Level_x0020_" + (i + 1)] =  folNames[i];
                }
-               formattedMetadata = formatRESTBody(metadata);
+               formattedMetadata = SPRESTSupportLib.formatRESTBody(metadata);
                fileData.push({
                      name: item.File.Name,
                      folderRelativeUrl: "https://cawater.sharepoint.com/teams/swp-dom/RSO/PSMP",
@@ -153,12 +158,12 @@ function copyFiles() {
                      metadata: formattedMetadata
                });
             }
-            
+
             for (let file of fileData)
-               RESTrequest({
+               SPRESTSupportLib.RESTrequest({
                      setDigest: true,
-                     url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/folders/getByUrl('" + 
-                        file.folderRelativeUrl + "')/files/getByUrl('" + file.fileRelativeUrl + 
+                     url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/folders/getByUrl('" +
+                        file.folderRelativeUrl + "')/files/getByUrl('" + file.fileRelativeUrl +
                         "')/copyTo('" + newUrlPrefix + "', false)",
                      method: "POST",
                      successCallback: (data) => {
@@ -177,11 +182,11 @@ function copyFiles() {
 }
 
 /****************************************************************************
- * 
+ *
  *    SITE THEME SETTING
- * 
+ *
  * Theme properties in JSON:
- * 
+ *
  * var pal = {
     "palette" : {
           "themePrimary": "#1BF242",
@@ -211,12 +216,12 @@ function copyFiles() {
          "error": "#ff5f5f"
       }
    }
-   * 
+   *
    ****************************************************************************/
 
 function themeRequest(
-   themeAction: "AddTenantTheme" | "DeleteTenantTheme" | "GetTenantThemingOptions" | "ApplyTheme" | "UpdateTenantTheme", 
-   name?: string, 
+   themeAction: "AddTenantTheme" | "DeleteTenantTheme" | "GetTenantThemingOptions" | "ApplyTheme" | "UpdateTenantTheme",
+   name?: string,
    properties?: string
 ): void {
    let requestProperties: {
@@ -228,7 +233,7 @@ function themeRequest(
       requestProperties.name = name;
    if (properties)
       requestProperties.themeJson = properties;
-   RESTrequest({
+   SPRESTSupportLib.RESTrequest({
       setDigest: true,
       url: SiteUrl + "/_api/ThemeManager/" + themeAction,
       method: "POST",
@@ -238,10 +243,10 @@ function themeRequest(
       },
       data: JSON.stringify(requestProperties),
       successCallback: (data/*, text, reqObj */) => {
-   
+
       },
       errorCallback: (reqObj/*, status, errThrown */) => {
-   
+
       }
    });
 }

@@ -1,19 +1,21 @@
 ﻿{
    "dev": {
+      "createNonExistentPathsOnCopy": true,
       "rootpaths": {
          "projectRootDir": "D:/dev/SharePoint/SPTools",
-         "copyTargetRootDir": "C:/Users/Mitch/California Department of Water Resources/Change Advisory Board - Site Assets/SPTools"
+         "remoteRootDir": "C:/Users/Mitch/California Department of Water Resources/Compliance Program Repository ME - Site Assets/SPTools",
       },
       "specialFiles" : {
          "lastCompileDateFileName": "lastCompileTime.txt"
       },
       "source": {
          "entryFile": {
-            "path": "${rootpaths.projectRootDir}/src/SPTools.aspx",
+            "sourcepath": "${rootpaths.projectRootDir}/src/SPTools.aspx",
+            "destinationpath": "${rootpaths.remoteRootDir}",
             "variableValues": [
-               { "variableName": "SPREST_FolderPath", "value": "/js/SPREST" },
-               { "variableName": "SPTOOLS_JS_FolderPath", "value": "/js" },
-               { "variableName": "CSS_FolderPath", "value": "/css" }
+               { "variableName": "SPREST_JS_FolderPath", "value": "./js/SPREST" },
+               { "variableName": "SPTOOLS_JS_FolderPath", "value": "./js" },
+               { "variableName": "CSS_FolderPath", "value": "./css" }
             ]
          },
          "tsFiles": {
@@ -41,7 +43,7 @@
       },
       "backup": {
          "preBuildBackup": {
-            "backupDestinationPath": "${rootpaths.copyTargetRootDir}/Backup",
+            "backupDestinationPath": "${rootpaths.remoteRootDir}/Backup",
             "items": [
                {
                   "from": "${rootpaths.projectRootDir}/build-tools/*.ps1",
@@ -64,10 +66,11 @@
       }
    },
    "test": {
+      "createNonExistentPathsOnCopy": true,
       "rootpaths": {
          "projectRootDir": "D:/dev/SharePoint/SPTools",
-         "copyTargetRootDir": "C:/Users/Mitch/California Department of Water Resources/Change Advisory Board - Site Assets/SPTools",
-         "backupRoot": "${copyTargetRootDir}/Backup"
+         "remoteRootDir": "C:/Users/Mitch/California Department of Water Resources/Compliance Program Repository ME - Site Assets/SPTools",
+         "backupRoot": "${remoteRootDir}/Backup"
       },
       "specialFiles:" : {
          "lastCompileDateFileName": "lastCompileTime.txt"
@@ -123,10 +126,11 @@
       }
    },
    "prod": {
+      "createNonExistentPathsOnCopy": true,
       "rootpaths": {
          "projectRootDir": "D:/dev/SharePoint/SPTools",
-         "copyTargetRootDir": "C:/Users/Mitch/California Department of Water Resources/Change Advisory Board - Site Assets/SPTools",
-         "backupRoot": "${copyTargetRootDir}/Backup"
+         "remoteRootDir": "C:/Users/Mitch/California Department of Water Resources/Compliance Program Repository ME - Site Assets/SPTools",
+         "backupRoot": "${remoteRootDir}/Backup"
       },
       "specialFiles:" : {
          "lastCompileDateFileName": "lastCompileTime.txt"

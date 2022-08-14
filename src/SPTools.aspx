@@ -26,20 +26,20 @@
   <script src="/_layouts/15/sp.runtime.js"></script>
   <script src="/_layouts/15/sp.js"></script>
 
-  <script src="$(SPREST_JS_FolderPath)/SPRESTGlobals.js"></script>
-  <script src="$(SPREST_JS_FolderPath)/SPListREST.js"></script>
-  <script src="$(SPREST_JS_FolderPath)/SPSiteREST.js"></script>
-  <script src="$(SPREST_JS_FolderPath)/SPUserREST.js"></script>
-  <script src="$(SPREST_JS_FolderPath)/SPRESTSupportLib.js"></script>
+  <script src="${SPREST_JS_FolderPath}/SPRESTGlobals.js"></script>
+  <script src="${SPREST_JS_FolderPath}/SPListREST.js"></script>
+  <script src="${SPREST_JS_FolderPath}/SPSiteREST.js"></script>
+  <script src="${SPREST_JS_FolderPath}/SPUserREST.js"></script>
+  <script src="${SPREST_JS_FolderPath}/SPRESTSupportLib.js"></script>
 
- <script src="$(SPTOOLS_JS_FolderPath)/SPTools.js"></script>
-  <script src="$(SPTOOLS_JS_FolderPath)/SPOtherTools.js"></script>
+ <script src="${SPTOOLS_JS_FolderPath}/SPTools.js"></script>
+  <script src="${SPTOOLS_JS_FolderPath}/SPOtherTools.js"></script>
  <!-- <script src="testing.js"></script> -->
-  <script src="$(SPTOOLS_JS_FolderPath)/REST%20Requesting.js"></script>
-  <script src="$(SPTOOLS_JS_FolderPath)/liblisting.js"></script>
-  <link href="$(CSS_FolderPath)/RestRequesting.css" rel="stylesheet" />
-  <link href="$(CSS_FolderPath)/liblisting.css" rel="stylesheet" />
-  <link href="$(CSS_FolderPath)/SPTools.css" rel="stylesheet" />
+  <script src="${SPTOOLS_JS_FolderPath}/REST%20Requesting.js"></script>
+  <script src="${SPTOOLS_JS_FolderPath}/liblisting.js"></script>
+  <link href="${CSS_FolderPath}/RestRequesting.css" rel="stylesheet" />
+  <link href="${CSS_FolderPath}/liblisting.css" rel="stylesheet" />
+  <link href="${CSS_FolderPath}/SPTools.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -54,7 +54,7 @@
         <button type="button" onclick="displayPage('liblist-container');">Library Tools</button>
       </span>
     </p>
-    <form id="main-form">
+    <form id="SPToolsForm">
       <div id="menu-tabs">
         <span class="menu-button fff8ff" onclick="selectMenu(this);" id="server-button">Server</span>
         <span class="menu-button fffff8" onclick="selectMenu(this);" id="site-button">Site</span>
@@ -302,7 +302,7 @@
 ===================================================== -->
 
   <div id="restreq-container">
-    <form>
+    <form id="REST-Requesting-form">
       <p style="margin-top:-2em;"><button type="button" onclick="displayPage('container');">Home</button></p>
       <!-- Start HTML Form Web Part -->
       <div id="main-grid">
@@ -391,7 +391,7 @@
         LIBRARY LISTING PAGE
 ===================================================== -->
   <div id="liblist-container">
-    <form id="theForm">
+    <form id="LibListingForm">
       <!--
       <p style="float:right;" id="custom-listing-genurl">
       <input name="generatedUrl" onblur="this.style.display = 'none';"

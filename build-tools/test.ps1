@@ -1,40 +1,40 @@
-
-function Build-DictionaryFromJson {
+function Get-ObjectProperty {
    [CmdletBinding()]
-   [OutputType([hashtable])]
-   [Parameter(ValueFromPipeline=$true)]
    param (
-      [PSObject]$Json
+       [Parameter(Mandatory, ValueFromPipeline)]
+       [PSObject]$PSObject,
+       [string]$ObjectProperty
    )
-   function Read-Object {
-      [CmdletBinding()]
-      [OutputType([System.Void])]
-      param (
-         [PSObject]$Object
-      )
 
-      foreach ($prop in $Object | Get-Member) {
-         if ($prop.MemberType -eq "Method") {
-            continue
-         }
-         if ($prop.Definition | Select-String -Pattern "^System[^\s]*Object") {
-            $Breadcrumb.Push($prop.Name)
-            Read-Object $Object.($prop.Name)
-            $Breadcrumb.Pop() | Out-Null
-         } else {
-            $Breadcrumb.Push($prop.Name)
-            $BreadcrumbToReverse = $Breadcrumb.toArray().Clone()
-            [array]::Reverse($BreadcrumbToReverse)
-            $Dictionary.Add($BreadcrumbToReverse -join ".", $Object.($prop.Name))
-            $Breadcrumb.Pop() | Out-Null
-         }
-      }
+   process {
+      Write-Host 'In Get-ObjectProperty:'
+      Write-Host "`$PSObject.`$ObjectProperty -is [array]:" ($PSObject.$ObjectProperty -is [array])
+      Write-Host "`$PSObject.`$ObjectProperty.GetType(): " $PSObject.$ObjectProperty.GetType()
+      Write-Host "`$PSObject.`$ObjectProperty: " $PSObject.$ObjectProperty
+      $PSObject.PSObject.Properties.Item($ObjectProperty) ? $PSObject.$ObjectProperty : $null
    }
-
-   $Breadcrumb = [System.Collections.Generic.Stack[String]]::new()
-   $Dictionary = @{}
-   Read-Object $Json
-   return $Dictionary
 }
 
-Build-DictionaryFromJson (Get-Content -Path ($PSScriptRoot + "/test.json") | ConvertFrom-Json) | Write-Output
+@{ include = @('./src/ts/**/*') } | ConvertTo-Json | Set-Content -Path "config.json"
+Write-Host "`n======== Part 1 ========="
+$configInfo = Get-Content "config.json" | ConvertFrom-Json
+$returnedValue = Get-ObjectProperty $configInfo 'include'
+Write-Host "`nglobal scope:"
+Write-Host "`$configInfo.include -is [array]:" ($configInfo.include -is [array])
+Write-Host "`$configInfo.include.GetType(): " $configInfo.include.GetType()
+Write-Host "`$configInfo.include: " $configInfo.include
+Write-Host "`n`$returnedValue -is [array]: " ($returnedValue -is [array])
+Write-Host "`$returnedValue.GetType(): " $returnedValue.GetType()
+Write-Host "`$returnedValue: " $returnedValue
+
+@{ include = @('./src/ts/**/*', './src/css/**/*') } | ConvertTo-Json | Set-Content -Path "config.json"
+Write-Host "`n======== Part 2 ========="
+$configInfo = Get-Content "config.json" | ConvertFrom-Json
+$returnedValue = Get-ObjectProperty $configInfo 'include'
+Write-Host "`nglobal scope:"
+Write-Host "`$configInfo.include -is [array]:" ($configInfo.include -is [array])
+Write-Host "`$configInfo.include.GetType(): " $configInfo.include.GetType()
+Write-Host "`$configInfo.include: " $configInfo.include
+Write-Host "`n`$returnedValue -is [array]: " ($returnedValue -is [array])
+Write-Host "`$returnedValue.GetType(): " $returnedValue.GetType()
+Write-Host "`$returnedValue: " $returnedValue

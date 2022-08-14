@@ -50,17 +50,17 @@
     fieldset#date-control label {
         margin: 0.3em auto;
     }
-    
+
     table {
         border: 2px solid green;
         width: 100%;
     }
-    
+
     td {
         border: 1px solid black;
         padding: 0.2em 0.5em;
     }
-    
+
     th {
         color: white;
         background-color: black;
@@ -87,7 +87,7 @@
 
 <div id="container">
 <p id="title">Library Listing</p>
-<form id="theForm">
+<form id="LibListingForm">
     <!--
     <label>URL: <input name="url" size="120"
             value="https://cawater.sharepoint.com/teams/swp-dom/RSO/PSMP" /></label>

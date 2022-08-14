@@ -11,6 +11,15 @@
 			"label": "tsc: build - tsconfig.json"
 		},
 		{
+			"type": "shell",
+			"command": "tsc",
+			"args": [
+				"--build", "--listEmittedFiles", "${workspaceFolder}/tsconfig.json"
+			],
+			"problemMatcher": [],
+			"label": "tsc verbose build"
+		},
+		{
 			"label": "PowerShell SPTTools build",
 			"type": "shell",
 			"command": "pwsh ${workspaceFolder}/build-Tools/buildSPToolsV2.ps1",
