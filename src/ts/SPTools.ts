@@ -1,11 +1,13 @@
 "use strict";
 
+/*
 import { SPSiteREST } from '../../SPREST/src/SPSiteREST';
 import { SPListREST } from '../../SPREST/src/SPListREST';
 import * as SPRESTTypes from '../../SPREST/src/SPRESTtypes';
 import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
-import { listingOp } from './liblisting';
 
+import { listingControl } from './liblisting';
+*/
 type TShortFieldInfo = {
    id: string;
    name: string;
@@ -14,6 +16,7 @@ type TShortFieldInfo = {
 let lastMenuSelect: HTMLSelectElement,
       ErrorState: boolean = false,
       CurrentPageId: string,
+      SPToolsForm: HTMLFormElement,
 /*
       ServerInfo = {
        // Site Properties
@@ -63,10 +66,11 @@ let lastMenuSelect: HTMLSelectElement,
          nonBaseFieldsInfo: TShortFieldInfo[];
       };
 
-export function displayPage(which: string): void {
+function displayPage(which: string): void {
    document.getElementById(CurrentPageId)!.style.display = "none";
    document.getElementById(CurrentPageId = which)!.style.display = "block";
 }
+
 
 /**
  * @function initializeTab --
@@ -77,9 +81,8 @@ function initializeTab(tabName: string): void {
    let node: HTMLElement,
       temp: string,
       oNode: HTMLOptionElement,
-      form: HTMLFormElement = document.getElementById("main-form") as HTMLFormElement,
-      parsedUrl: SPRESTTypes.TParsedURL | null = SPRESTSupportLib.ParseSPUrl(location.href),
-      spServerREST: SPRESTSupportLib.SPServerREST = new SPRESTSupportLib.SPServerREST({
+      parsedUrl: TParsedURL | null = ParseSPUrl(location.href),
+      spServerREST: SPServerREST = new SPServerREST({
          URL: parsedUrl!.server
       }),
       selectObj: HTMLSelectElement,
@@ -87,7 +90,7 @@ function initializeTab(tabName: string): void {
       spListREST: SPListREST,
       setOneOptionError = (selectListName: string, optionText: string) => {
          let oNode = document.createElement("option"),
-               selectNode = form[selectListName];
+               selectNode = SPToolsForm[selectListName];
          while (selectNode.firstChild)
             selectNode.removeChild(selectNode.firstChild);
          oNode.appendChild(document.createTextNode(optionText));
@@ -97,26 +100,26 @@ function initializeTab(tabName: string): void {
    switch (tabName) {
 // server panel build
    case "server":
-      form["server-name"].value = parsedUrl!.server;
-      node = form["sites-list"];
+      SPToolsForm["server-name"].value = parsedUrl!.server;
+      node = SPToolsForm["sites-list"];
       while (node.firstChild)
          node.removeChild(node.firstChild);
       // retrieve name or root web
-      spServerREST.getRootweb().then((response) => {
+      spServerREST.getRootweb().then((response: any) => {
          oNode = document.createElement("option");
          oNode.value = response.data.d.Id;
          oNode.appendChild(document.createTextNode(response.data.d.Title));
          node.appendChild(oNode);
-      }).catch((response) => {
+      }).catch((response: any) => {
          if (response.reqObj.status == 403)
             setOneOptionError("sites-list", "no permission");
          else
             setOneOptionError("sites-list", response.reqObj.status + ": unknown error");
       });
       // get the SITE and WEB properties of server
-      spServerREST.getSiteProperties().then((response) => {
+      spServerREST.getSiteProperties().then((response: any) => {
          let value, properties = response.data.d,
-               node = form["server-properties"];
+               node = SPToolsForm["server-properties"];
 
          while (node.firstChild)
                node.removeChild(node.firstChild);
@@ -130,7 +133,7 @@ function initializeTab(tabName: string): void {
             oNode.value = value;
             node.appendChild(oNode);
          }
-         spServerREST.getWebProperties().then((response) => {
+         spServerREST.getWebProperties().then((response: any) => {
             let value, properties = response.data.d;
 
             while (node.firstChild)
@@ -145,12 +148,12 @@ function initializeTab(tabName: string): void {
                oNode.value = value;
                node.appendChild(oNode);
             }
-         }).catch((response) => {
+         }).catch((response: any) => {
             oNode = document.createElement("option");
             oNode.appendChild(document.createTextNode(response.text));
             node.appendChild(oNode);
          });
-      }).catch((response) => {
+      }).catch((response: any) => {
          setOneOptionError("server-properties", response.text);
       });
       break;
@@ -158,7 +161,7 @@ function initializeTab(tabName: string): void {
 // SITE panel build
    //   if (CurrentSite && CurrentSite.initialized && CurrentSite.initialized == true)
    //      return;
-      if ((parsedUrl = SPRESTSupportLib.ParseSPUrl(form["site-name"].value)) == null)
+      if ((parsedUrl = ParseSPUrl(SPToolsForm["site-name"].value)) == null)
          throw "no url";
       if ((spSiteREST = new SPSiteREST({
          server: parsedUrl.server,
@@ -185,7 +188,7 @@ function initializeTab(tabName: string): void {
          spSiteREST.getSiteProperties().then((response: any) => {
             let value: string,
                   properties: any = response.data.d,
-                  node: HTMLElement = form["site-properties"];
+                  node: HTMLElement = SPToolsForm["site-properties"];
 
             // since the site was found, store it for next time
             localStorage.setItem("SPToolsLastSite", parsedUrl!.server + "/" + parsedUrl!.siteFullPath);
@@ -217,15 +220,15 @@ function initializeTab(tabName: string): void {
                   node.appendChild(oNode);
                }
                CurrentSite.webProperties = properties;
-            }).catch((response) => {
+            }).catch((response: any) => {
                setOneOptionError("web-properties", response.text);
             });
-         }).catch((response) => {
+         }).catch((response: any) => {
             setOneOptionError("site-properties", response.text);
          });
          // get list of SUBSITES of site
          spSiteREST.getSubsites().then((response: any) => {
-            let node = form["subsites-list"];
+            let node = SPToolsForm["subsites-list"];
             while (node.firstChild)
                node.removeChild(node.firstChild);
             if (response.length == 0) {
@@ -243,13 +246,13 @@ function initializeTab(tabName: string): void {
                   oNode.value = item.id;
                   node.appendChild(oNode);
                }
-         }).catch((response) => {
+         }).catch((response: any) => {
             setOneOptionError("subsites-list", response.text);
          });
          spSiteREST.getSiteContentTypes({
             expand: "Parent"
-         }).then((response) => {
-            let node = form["site-content-types"], items = response.data.d.results;
+         }).then((response: any) => {
+            let node = SPToolsForm["site-content-types"], items = response.data.d.results;
             while (node.firstChild)
                node.removeChild(node.firstChild);
             if (response.length == 0) {
@@ -269,14 +272,14 @@ function initializeTab(tabName: string): void {
                }
                CurrentSite.contentTypes = items;
             }
-         }).catch((response) => {
+         }).catch((response: any) => {
             setOneOptionError("site-content-types", response.text);
          });
          // get the lists of LISTS and LIBRARIES of site
-         spSiteREST.getLists().then((response) => {
+         spSiteREST.getLists().then((response: any) => {
             let lists = response.data.d.results,
-                  node = form["site-lists"],
-                  node2 = form["site-lists2"];
+                  node = SPToolsForm["site-lists"],
+                  node2 = SPToolsForm["site-lists2"];
 
             if (lists.length == 0) {
                oNode = document.createElement("option");
@@ -295,19 +298,19 @@ function initializeTab(tabName: string): void {
                   }
             }
             CurrentSite.siteLists = lists;
-         }).catch((response) => {
+         }).catch((response: any) => {
             setOneOptionError("site-lists", response.text);
          });
          CurrentSite.initialized = true;
-      }).catch((response) => {
+      }).catch((response: any) => {
          setOneOptionError("site-lists", "SP Site REST initialization failure");
       });
       break;
    case "list":
 // list panel build
-      if ((parsedUrl = SPRESTSupportLib.ParseSPUrl(form["site-name"].value)) == null)
+      if ((parsedUrl = ParseSPUrl(SPToolsForm["site-name"].value)) == null)
          throw "this error";
-      selectObj = form["site-lists2"];
+      selectObj = SPToolsForm["site-lists2"];
       if (selectObj.selectedIndex < 0)
          return;
       CurrentList = {
@@ -338,23 +341,23 @@ function initializeTab(tabName: string): void {
          spListREST.getListItemIds().then((response: any) => {
             CurrentList.itemIds = response;
             updateListTables("ids", CurrentList.itemIds);
-            fetchListItemId(form);
-         }).catch((response) => {
+            fetchListItemId(SPToolsForm);
+         }).catch((response: any) => {
             node = document.getElementById("list-error") as HTMLElement;
             node.replaceChild(document.createTextNode(
                "List error: " + (response.error ? response.error.message.value : response.message)
             ), node.firstChild as ChildNode);
          });
-         spListREST.getListProperties().then((response) => {
+         spListREST.getListProperties().then((response: any) => {
             updateListTables("listprops", response.data.d);
-         }).catch((response) => {
+         }).catch((response: any) => {
             node = document.getElementById("list-error") as HTMLElement;
             node.replaceChild(document.createTextNode(
                "List error: " + (response.error ? response.error.message.value : response.message)
             ), node.firstChild as ChildNode);
          });
          // populate COLUMNS table of list
-         spListREST.getFields().then((response) => {
+         spListREST.getFields().then((response: any) => {
             let options: {
                text: string;
                value: string;
@@ -391,7 +394,7 @@ function initializeTab(tabName: string): void {
             while (fieldSelectorPNode.firstChild)
                fieldSelectorPNode.removeChild(fieldSelectorPNode.firstChild);
             // build new one
-            SPRESTSupportLib.buildSelectSet(
+            buildSelectSet(
                fieldSelectorPNode,
                "listcopyfieldsselect",
                options,
@@ -425,7 +428,7 @@ function initializeTab(tabName: string): void {
 //            for (let field of CurrentList.rawFields!)
 //               CurrentList.fieldsInfo.push({id: field.Id, name: field.Title});
             updateListTables("fields-init", CurrentList.fieldsInfo);
-         }).catch((response) => {
+         }).catch((response: any) => {
             node = document.getElementById("list-error") as HTMLSpanElement;
             node.replaceChild(document.createTextNode(
                "List error: " + (response.error ? response.error.message.value : response.message)
@@ -470,7 +473,7 @@ function showValue(which: string, selectObj: HTMLSelectElement) {
       node.replaceChild(document.createTextNode("\u00a0"), node.firstChild as ChildNode);
       ErrorState = false;
    }
-   form.selectedProperty.value = value;
+   SPToolsForm.selectedProperty.value = value;
    if (which == "server")
       value = CurrentServer[parts[1] + "Properties"][parts[2] as any];
    else if (which == "site")
@@ -482,21 +485,21 @@ function showValue(which: string, selectObj: HTMLSelectElement) {
       for (contentType of CurrentSite.contentTypes)
          if (selected == contentType.Id.StringValue)
             break;
-      form["cont-type-group"].value = contentType.Group;
-      form["cont-type-parent"].value = contentType.Parent.Name + " (Id: " +
+      SPToolsForm["cont-type-group"].value = contentType.Group;
+      SPToolsForm["cont-type-parent"].value = contentType.Parent.Name + " (Id: " +
             contentType.Parent.Id.StringValue + ")";
-      form["cont-type-id"].value = contentType.Id.StringValue;
-      form["cont-type-readonly"].checked = contentType.ReadOnly;
-      form["cont-type-sealed"].checked = contentType.Sealed;
+      SPToolsForm["cont-type-id"].value = contentType.Id.StringValue;
+      SPToolsForm["cont-type-readonly"].checked = contentType.ReadOnly;
+      SPToolsForm["cont-type-sealed"].checked = contentType.Sealed;
    }
    if (typeof value == "object")
       value = JSON.stringify(value, null, "  ");
    else if (value == "")
       value = "<empty string>";
    if (which == "server")
-      form["property-value"].value = value;
+      SPToolsForm["property-value"].value = value;
    else if (which == "site")
-      form["site-property-value"].value = value;
+      SPToolsForm["site-property-value"].value = value;
 }
 
 
@@ -517,7 +520,7 @@ function updateListTables(which: string, data: any[] | HTMLSelectElement) {
       node.replaceChild(document.createTextNode(data[0]), node.firstChild as ChildNode);
       node = document.getElementById("list-item-end-id") as HTMLInputElement;
       node.replaceChild(document.createTextNode(data[data.length - 1]), node.firstChild as ChildNode);
-      (document.getElementById("main-form") as HTMLFormElement).currentId.value = data[0];
+      (document.getElementById("main-SPToolsForm") as HTMLFormElement).currentId.value = data[0];
    } else if (which == "fields-init") {
       let selected: boolean = false;
 
@@ -550,7 +553,7 @@ function updateListTables(which: string, data: any[] | HTMLSelectElement) {
             CurrentList.rawFields!.push(fldProperties);
             buildPropertiesTable(fldProperties,
                   document.querySelector("table#fields-table tbody") as HTMLTableSectionElement);
-         }).catch((response) => {
+         }).catch((response: any) => {
             let node = document.getElementById("list-error") as HTMLDivElement;
             node.replaceChild(document.createTextNode(
                "List error: " + (response.error ? response.error.message.value : response.message)
@@ -587,14 +590,14 @@ function updateListTables(which: string, data: any[] | HTMLSelectElement) {
 /**
  * @event {change} URL text box for Site panel
  * @function setSiteAsCurrent -- handler to trigger changing all controls for current site
- * @param {HtmlTextInputDomNode} control - just a way of getting the form object
+ * @param {HtmlTextInputDomNode} control - just a way of getting the SPToolsForm object
  */
 function setSiteAsCurrent(control: HTMLInputElement) {
-   let form = control.form as HTMLFormElement,
+   let SPToolsForm = control.form as HTMLFormElement,
       controlValue: string;
 
    if (control.nodeName.toLowerCase() == "button")
-      controlValue = form["site-name"].value;
+      controlValue = SPToolsForm["site-name"].value;
    else
       controlValue = control.value;
    if (CurrentSite)
@@ -605,26 +608,26 @@ function setSiteAsCurrent(control: HTMLInputElement) {
 /**
  * @event {click} -- button on site tab labeled "Go To List"
  * @function selectListFromSiteTab -- initiates action to display & initialize the list tab
- * @param {HtmlDomNode} control -- either select or form reference
+ * @param {HtmlDomNode} control -- either select or SPToolsForm reference
  */
 function selectListFromSiteTab(control: HTMLInputElement | HTMLSelectElement | HTMLFormElement) {
    let i: number,
       value: string,
       selectObj: HTMLSelectElement,
-      form: HTMLFormElement | null;
+      SPToolsForm: HTMLFormElement | null;
 
-   if ((form = control.form) != null)
+   if ((SPToolsForm = control.form) != null)
       selectObj = <HTMLSelectElement>control;
    else {
-      form = <HTMLFormElement>control;
-      selectObj = form["site-lists"];
+      SPToolsForm = <HTMLFormElement>control;
+      selectObj = SPToolsForm["site-lists"];
    }
    if (selectObj.selectedIndex < 0)
       return;
    value = selectObj.options[selectObj.selectedIndex].value;
-   form.newCopyName.value = value.split(";")[1] + "_Copy";
-   form.itemsToCopy.value = "25";
-   selectObj = form["site-lists2"];
+   SPToolsForm.newCopyName.value = value.split(";")[1] + "_Copy";
+   SPToolsForm.itemsToCopy.value = "25";
+   selectObj = SPToolsForm["site-lists2"];
    for (i = 0; i < selectObj.options.length; i++)
       if (selectObj.options[i].value == value)
          break;
@@ -640,7 +643,7 @@ function selectListFromSiteTab(control: HTMLInputElement | HTMLSelectElement | H
 function selectMenu(spanElem: HTMLSpanElement) {
    let bkgdcolor: string = spanElem.className.match(/[0-9a-f]{6}/)![0],
       selection: string,
-      form = document.getElementById("main-form") as HTMLFormElement;
+      SPToolsForm = document.getElementById("main-SPToolsForm") as HTMLFormElement;
 
    if (lastMenuSelect) {
       lastMenuSelect.style.fontWeight = "normal";
@@ -651,11 +654,11 @@ function selectMenu(spanElem: HTMLSpanElement) {
    selection = spanElem.id.match(/(\w+)-button/)![1];
    (document.getElementById(selection + "-panel") as HTMLDivElement).style.display = "block";
    if (selection == "site") {
-      let value = form["site-name"].value;
+      let value = SPToolsForm["site-name"].value;
 
       if ((value == null || value.length == 0) &&
                (value = localStorage.getItem("SPToolsLastSite")) != null)
-         form["site-name"].value = value;
+         SPToolsForm["site-name"].value = value;
    }
    initializeTab(selection);
    lastMenuSelect = spanElem as HTMLSelectElement;  // TODO: is this correct?
@@ -672,21 +675,21 @@ function expandProp(
    buttonObj: HTMLButtonElement,
    which: string
 ): void {
-   let form = buttonObj.form as HTMLFormElement,
+   let SPToolsForm = buttonObj.form as HTMLFormElement,
       parts = buttonObj.form!.selectedProperty.value.match(/(\w+)\/([\w_]+)\s?(\{\s?\})?/) as RegExpMatchArray;
 
    if (!parts[3])
       return;
    if (which == "server") {
-      let spServerREST = new SPRESTSupportLib.SPServerREST({
-         URL: SPRESTSupportLib.ParseSPUrl(location.href)!.server
+      let spServerREST = new SPServerREST({
+         URL: ParseSPUrl(location.href)!.server
       });
 
       spServerREST.getEndpoint(
          "/" + parts[1] + "/" + parts[2]
-      ).then((response) => {
-         form["property-value"].value = JSON.stringify(response.data.d, null, "  ");
-      }).catch((response) => {
+      ).then((response: any) => {
+         SPToolsForm["property-value"].value = JSON.stringify(response.data.d, null, "  ");
+      }).catch((response: any) => {
          let errorSet = document.getElementById("error-set") as HTMLSpanElement;
 
          ErrorState = true;
@@ -698,7 +701,7 @@ function expandProp(
             errorSet.replaceChild(document.createTextNode(response.text), errorSet.firstChild as ChildNode);
       });
    } else if (which == "site") {
-      let parsedUrl = SPRESTSupportLib.ParseSPUrl(form["site-name"].value) as SPRESTTypes.TParsedURL,
+      let parsedUrl = ParseSPUrl(SPToolsForm["site-name"].value) as TParsedURL,
             spSiteREST = new SPSiteREST({
                server: parsedUrl.server,
                site: parsedUrl.siteFullPath
@@ -707,8 +710,8 @@ function expandProp(
       spSiteREST.getEndpoint(
          "/" + parts[1] + "/" + parts[2]
       ).then((response: any) => {
-         form["site-property-value"].value = JSON.stringify(response.data.d, null, "  ");
-      }).catch((response) => {
+         SPToolsForm["site-property-value"].value = JSON.stringify(response.data.d, null, "  ");
+      }).catch((response: any) => {
          let errorSet = document.getElementById("site-error-set") as HTMLSpanElement;
 
          ErrorState = true;
@@ -744,37 +747,37 @@ function fetchListItemId(
    action?: string | number
 ) {
    let itemId: number = -1,
-      form: HTMLFormElement | null = null,
+      SPToolsForm: HTMLFormElement | null = null,
       errorNode = document.getElementById("list-error") as HTMLDivElement;
 
    if (action == "nextup") {
       if (CurrentList.currentIndex >= CurrentList.itemIds.length - 1)
          return errorNode.replaceChild(document.createTextNode("At end of upper range"), errorNode.firstChild as ChildNode);
       itemId = CurrentList.itemIds[++CurrentList.currentIndex];
-      form = (control as HTMLInputElement).form;
+      SPToolsForm = (control as HTMLInputElement).form;
    } else if (action == "nextdown") {
       if (CurrentList.currentIndex == 0)
          return errorNode.replaceChild(document.createTextNode("At end of lower range"), errorNode.firstChild as ChildNode);
       itemId = CurrentList.itemIds[--CurrentList.currentIndex];
-      form = (control as HTMLInputElement).form;
+      SPToolsForm = (control as HTMLInputElement).form;
    } else if (control.nodeName.toLowerCase() == "input") { // this is an onchange event in input box; fetch value
       itemId = action as number;
       if ((action = CurrentList.itemIds.findIndex((val: number) => val == itemId)) < 0)
          return errorNode.replaceChild(document.createTextNode("No such ID in this list"),
                errorNode.firstChild as ChildNode);
       CurrentList.currentIndex = action as number;
-      form = (control as HTMLInputElement).form;
-   } else if (control.nodeName.toLowerCase() == "form") { // undefined
+      SPToolsForm = (control as HTMLInputElement).form;
+   } else if (control.nodeName.toLowerCase() == "SPToolsForm") { // undefined
       CurrentList.currentIndex = 0;
       itemId = CurrentList.itemIds[CurrentList.currentIndex];
-      form = control as HTMLFormElement;
+      SPToolsForm = control as HTMLFormElement;
    }
    errorNode.replaceChild(document.createTextNode("\u00a0"), errorNode.firstChild as ChildNode);
-   form!.currentId.value = CurrentList.itemIds[CurrentList.currentIndex];
+   SPToolsForm!.currentId.value = CurrentList.itemIds[CurrentList.currentIndex];
    // now populate the table
    CurrentList.restInterface!.getItemData({
       itemId: itemId
-   }).then((response) => {
+   }).then((response: any) => {
       let tdNode, value, metadata = response.data.d;
 
       if (CurrentList.itemTableInitialized == false) {
@@ -811,7 +814,7 @@ function fetchListItemId(
          errorNode.replaceChild(document.createTextNode("\u00a0"), errorNode.firstChild as ChildNode);
          ErrorState = false;
       }
-   }).catch((response) => {
+   }).catch((response: any) => {
       let errTxt;
 
       ErrorState = true;
@@ -845,10 +848,12 @@ function fetchListItemId(
 $(() => {
    let queryParts: URLSearchParams = new URLSearchParams(location.search);
 
-   let SPToolsForm = document.getElementById('SPToolsForm') as HTMLFormElement;
+  // let LibListingSPToolsForm = document.getElementById('SPToolsSPToolsForm') as HTMLFormElement;
    CurrentPageId = "container";
    if (queryParts.get("listingfunc") != null)
-      listingOp(queryParts, SPToolsForm);
-   else
+      listingControl(queryParts, LibListingForm);
+   else {
+      SPToolsForm = document.getElementById("SPToolsForm") as HTMLFormElement;
       selectMenu(document.getElementById("server-button") as HTMLSpanElement);
+   }
 });

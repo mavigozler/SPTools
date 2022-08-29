@@ -15,6 +15,34 @@ $tsconfigChanged = $false
 $SubbedFilesList = [SubbedFileInfoList]::new()
 
 <# ===============  Function Defintions here ========================= #>
+function Get-AllTSConfigReferences {
+   [CmdletBinding()]
+   param (
+       [PSObject]$TSConfigFullPath,
+       [System.Collections.Generic.List[PSObject]]$RefsList
+   )
+
+   process {
+      if ($null -eq $RefsList) {
+         $RefsList = [System.Collections.Generic.List[PSObject]]::new()
+      }
+      if ((Test-Path -Path $TSConfigFullPath) -ne $false) {
+         $local:tsconfigJsonPathParent = (Get-Item -Path $TSConfigFullPath | Select-Object *).PSParentPath.Split("::")[1]
+         $local:tsconfigJson = Get-Content -Path $TSConfigFullPath | ConvertFrom-Json
+         $local:references = Get-ObjectProperty $local:tsconfigJson 'references'
+         if ($local:references.PSObject.Properties.Match("Length").Count -gt 0) {
+            foreach ($local:reference in $local:references) {
+               $local:refFile = Get-ChildItem -Path (Resolve-Path ($local:tsconfigJsonPathParent + "/" + $local:reference.path)) -Filter 'tsconfig.json'
+               $RefsList.Add($refFile)
+               Get-AllTSConfigReferences $local:refFile $RefsList
+            }
+            Write-Output -NoEnumerate $RefsList
+         }
+      } else {
+         Write-Output -NoEnumerate $null
+      }
+   }
+}
 
 # ====================  Script Scope code here =====================
 
@@ -114,44 +142,34 @@ if ((Test-Path -Path $tsconfigJsonPath) -eq $false) {
    throw "The tsconfig.json file was not found where specified: " + $tsconfigJsonPath + `
             "`nOtherwise set '`$transpiledSameFolder' to `$true"
 }
+
+
+
 # use references to find projects first
-$tsconfigJsonPathParent = (Get-Item -Path $tsconfigJsonPath | Select-Object *).PSParentPath.Split("::")[1]
-$tsconfigJson = Get-Content -Path $tsconfigJsonPath | ConvertFrom-Json
-$projects = foreach($reference in $tsconfigJson.references) {
-   Get-ChildItem -Path (Resolve-Path ($tsconfigJsonPathParent + "/" + $reference.path)) -Filter 'tsconfig.json'
-}
-$allTSfiles = foreach($project in $projects) {
+$allProjects = Get-AllTSConfigReferences $tsconfigJsonPath
+$allProjects.Insert(0, $tsconfigJsonPath)
+$allConfigs = [System.Collections.Generic.List[PSObject]]::new()
+foreach ($project in $allProjects.ToArray()) {
+   $config = @{}
+   $config.PathParent = (Get-Item -Path $project | Select-Object *).PSParentPath.Split("::")[1]
    $tsconfigJson = Get-Content -Path $project | ConvertFrom-Json
-   $tsconfigOutDir = Get-ObjectProperty $tsconfigJson.compilerOptions 'outDir'
-   $tsconfigRootDir = Get-ObjectProperty $tsconfigJson.compilerOptions 'rootDir'
+   $config.OutDir = Get-ObjectProperty $tsconfigJson.compilerOptions 'outDir'
+   $config.RootDir = Get-ObjectProperty $tsconfigJson.compilerOptions 'rootDir'
    $tsconfigFiles = Get-ObjectProperty $tsconfigJson 'files'
-   $tsconfigInclude = Get-ObjectProperty $tsconfigJson 'include'
-   $tsconfigExclude = Get-ObjectProperty $tsconfigJson 'exclude'
-   Get-ChildItem -Path $tsconfigJsonPathParent -Include $tsconfigJson.include -Exclude $tsconfigJson.exclude
+   $config.Files = foreach ($tsconfigFile in $tsconfigFiles) {
+      Resolve-Path ($config.PathParent + "/" + $tsconfigFile)
+   }
+   $tsconfigIncludes = Get-ObjectProperty $tsconfigJson 'include'
+   $config.Include = foreach ($tsconfigInclude in $tsconfigIncludes) {
+      Resolve-Path ($config.PathParent + "/" + $tsconfigInclude.Replace("**/*", "*.ts") )
+   }
+   $tsconfigExcludes = Get-ObjectProperty $tsconfigJson 'exclude'
+   $config.Exclude = foreach ($tsconfigExclude in $tsconfigExcludes) {
+      Resolve-Path ($config.PathParent + "/" + $tsconfigExclude.Replace("**/*", "*.ts"))
+   }
+   $allConfigs.Add($config)
 }
 
-
-if ($null -eq $tsConfigOutDir) {
-   if ($null -eq $tsConfigRootDir) {
-      $transpiledFullPath = $tsconfigJsonPathParts.Parent
-   }
-
-   if ($null -eq $transpiledPathRoot) {
-      throw "A transpiled output directory was specified for the tsconfig.json file '" + $tsconfigJsonPath + "'" + `
-            ", but no output directory was specified in the config file" + `
-            "`nOtherwise set '`$transpiledSameFolder' to `$true"
-   }
-   if ($transpiledPathRoot.Matches.Groups[1].Value.IndexOf("//") -ge 0) {
-      throw "A transpiled output directory was specified for the tsconfig.json file '" + $tsconfigJsonPath + "'" + `
-            ", but the output director 'outDir' was commented out in the config file." + `
-            "`nOtherwise set '`$transpiledSameFolder' to `$true"
-   }
-   $transpiledPathRoot = $projectRootDir + $groups[2].Value
-} else {
-   # Transpile to same folder
-   $transpiledPathRoot = $projectRootDir
-}
-#>
 # check if tsconfig.json file updated: if so, a full clean should be done
 if ((Get-Item -Path $tsconfigJsonPath | Select-Object -Property LastWriteTime | Get-Date) -ge $lastSavedDate) {
    $doClean = $true

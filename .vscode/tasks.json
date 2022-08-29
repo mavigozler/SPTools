@@ -7,14 +7,19 @@
 			"problemMatcher": [
 				"$tsc"
 			],
-			"group": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"label": "tsc: build - tsconfig.json"
 		},
 		{
 			"type": "shell",
 			"command": "tsc",
 			"args": [
-				"--build", "--listEmittedFiles", "${workspaceFolder}/tsconfig.json"
+				"--build",
+				"--listEmittedFiles",
+				"${workspaceFolder}/tsconfig.json"
 			],
 			"problemMatcher": [],
 			"label": "tsc verbose build"
@@ -27,12 +32,10 @@
 				"command": "pwsh ${workspaceFolder}/build-Tools/buildSPToolsV2.ps1"
 			},
 			"args": [
-				"-Env", "dev"
+				"-Env",
+				"dev"
 			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"presentation": {
 				"echo": true,
 				"reveal": "always",

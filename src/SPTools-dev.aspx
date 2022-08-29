@@ -5,13 +5,18 @@
   <title>SP Tools</title>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.min.js"
-      integrity="sha384-ODmDIVzN+pFdexxHEHFBQH3/9/vQ9uori45z4JjnFsRydbmQbmL5t1tQ0culUzyK"
-      crossorigin="anonymous"></script>
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js"></script>
+
   <!--
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-latest.js"
             integrity="sha512-2AL/VEauKkZqQU9BHgnv48OhXcJPx9vdzxN1JrKDVc4FPU/MEE/BZ6d9l0mP7VmvLsjtYwqiYQpDskK9dG8KBA=="
@@ -84,7 +89,7 @@
             </span>
 
             <span style="grid-column:1 / span 4;">
-              <label for="PropertyValue">Property Value</label>
+              <label for="propertyValue">Property Value</label>
             </span>
             <span style="grid-column:2 / 4">
               <textarea name="property-value" id="PropertyValue" rows="4" style="min-width:80%;"></textarea>
@@ -298,7 +303,7 @@
 
   <div id="restreq-container">
     <form id="REST-Requesting-form">
-      <p style="margin-top:-2em;"><button type="button" onclick="_displayPage('container');">Home</button></p>
+      <p style="margin-top:-2em;"><button type="button" onclick="displayPage('container');">Home</button></p>
       <!-- Start HTML Form Web Part -->
       <div id="main-grid">
         <span></span> <!-- necessary for grid -->
@@ -386,6 +391,7 @@
         LIBRARY LISTING PAGE
 ===================================================== -->
   <div id="liblist-container">
+    <form id="LibListingForm">
       <!--
       <p style="float:right;" id="custom-listing-genurl">
       <input name="generatedUrl" onblur="this.style.display = 'none';"
@@ -393,28 +399,14 @@
       <button type="button" onclick="generateURL('liblisting');">Generate URL from Settings</button>
     </p>
   -->
-    <div>
+    <p>
       <span style="display:inline-block;margin-left:3em;"><button type="button" onclick="displayPage('container');">Home</button></span>
       <span id="ll-title">Library Listing</span>
       <span id="working" style="display:none;margin-left:100px;">
         <img src="../Site%20Images/processing.gif" alt="working" style="width:100px" />
         Working
       </span>
-      <p style="display:inline-block;margin-left:10em;">
-      <span>Records read/processed: </span>
-      <span id="processed-count" style="font:bold 120% Tahoma,sans-serif;color:navy;">&nbsp;</span>
-      <span> of </span>
-      <span id="total-listing-count" style="font:bold 110% Tahoma,sans-serif;color:maroon;"></span>
-      </p>
-    </div>
-    <script>
-      function showLibForm(inputObj) {
-        inputObj.parentNode.style.display = "none";
-        LibListingForm.style.display = "block";
-      }
-    </script>
-    <p id="show-libform" style="display:none;"><button onclick="showLibForm(this);">Show Form</button></p>
-    <form id="LibListingForm">
+    </p>
     <div id="request-controls">
       <p class="request-control">
         <span>
@@ -422,10 +414,11 @@
         </span>
         <span class="sub-control"></span>
       </p>
-      <hr />
-      <p class="request-control">
-      <span><button type="button" onclick="listingControl('duplicatelisting', this.form);">List library duplicates</button> </span>
-      <span><button type="button" onclick="listingControl('listFoldersAndFiles', this.form);">List Folders with Their Files</button> </span>
+      <p class="request-control"><span>
+      <span>
+      <button type="button" onclick="listingControl('duplicatelisting', this.form);">List library duplicates</button> </span>
+      <button type="button" onclick="listingControl('listFoldersAndFiles', this.form);">List Folders with Their Files</button> </span>
+      </span>
       <span class="sub-control">
         <span class="input-control">Site:<br /><input name="SiteNameDuplicates" size="60"
           onchange="localStorage.setItem('sitenamedups', this.value);" /></span>
@@ -440,7 +433,6 @@
             style="font:normal 10pt 'Arial Narrow',sans-serif;" ></textarea>
       </span>
       </p>
-    <hr />
       <p class="request-control"><span>
         <button type="button" onclick="listingControl('makelibcopy', this.form);">Copy a list</button> </span>
         <span class="sub-control">
@@ -459,7 +451,6 @@
               style="font:normal 10pt 'Arial Narrow',sans-serif;" ></textarea>
         </span>
       </p>
-    <hr />
       <p class="request-control"><span>
         <button type="button" onclick="listingControl('findfilediff', this.form);">Check file differences</button> </span>
         <span class="sub-control">
@@ -479,7 +470,6 @@
        </span>
       </p>
       </div>
-  <!-- undisplayed part -->
     <div id="custom-listing" style="display:none;">
       <label>Site URL path: <input name="clistingSiteUrl" size="80"
           onchange="localStorage.setItem('clistingsiteurl', this.value);" /></label>
@@ -536,18 +526,19 @@
     </div>
     </form>
   </div> <!-- id=liblist-container -->
-<script>
-  LibListingForm = document.getElementById("LibListingForm");
-  LibListingForm.Lib1SitePath.value = localStorage.getItem('lib1sitepath');
-  LibListingForm.Lib1Name.value = localStorage.getItem('lib1name');
-  LibListingForm.Lib2SitePath.value = localStorage.getItem('lib2sitepath');
-  LibListingForm.Lib2Name.value = localStorage.getItem('lib2name');
-  LibListingForm.SourceSiteCopy.value = localStorage.getItem('sourcesitecopy');
-  LibListingForm.SourceNameCopy.value = localStorage.getItem('sourcenamecopy');
-  LibListingForm.DestSiteCopy.value = localStorage.getItem('destsitecopy');
-  LibListingForm.DestNameCopy.value = localStorage.getItem('destnamecopy');
-  LibListingForm.SiteNameDuplicates.value = localStorage.getItem('sitenamedups');
-  LibListingForm.LibraryNameDuplicates.value = localStorage.getItem('libnamedups');
-</script>
 </body>
+<script>
+  let pageform = document.getElementById("LibListingForm");
+  pageform.Lib1SitePath.value = localStorage.getItem('lib1sitepath');
+  pageform.Lib1Name.value = localStorage.getItem('lib1name');
+  pageform.Lib2SitePath.value = localStorage.getItem('lib2sitepath');
+  pageform.Lib2Name.value = localStorage.getItem('lib2name');
+  pageform.SourceSiteCopy.value = localStorage.getItem('sourcesitecopy');
+  pageform.SourceNameCopy.value = localStorage.getItem('sourcenamecopy');
+  pageform.DestSiteCopy.value = localStorage.getItem('destsitecopy');
+  pageform.DestNameCopy.value = localStorage.getItem('destnamecopy');
+  pageform.SiteNameDuplicates.value = localStorage.getItem('sitenamedups');
+  pageform.LibraryNameDuplicates.value = localStorage.getItem('libnamedups');
+</script>
+
 </html>

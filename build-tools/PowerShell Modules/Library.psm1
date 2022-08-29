@@ -5,12 +5,10 @@
        [PSObject]$PSObject,
        [string]$ObjectProperty
    )
-
    process {
-      Write-Host "In Get-ObjectProperty:"
-      Write-Host ("`$PSObject.`$ObjectProperty -is [array]: " + $PSObject.$ObjectProperty -is [array])
-      Write-Host ("`$PSObject.`$ObjectProperty: " + $PSObject.$ObjectProperty -is [array])
-      $PSObject.PSObject.Properties.Item($ObjectProperty) ? $PSObject.$ObjectProperty : $null
+      if ($PSObject.PSObject.Properties.Item($ObjectProperty)) {
+         ,$PSObject.$ObjectProperty
+      }
    }
 }
 
@@ -264,8 +262,13 @@ class SubbedFileInfoList {
 
    [int32]AddFileInfo(
       [string]$OriginalSourceFilePath,
-      [string]$DestinationPath
+      [string]$DestinationPath,
+      [string]$SubbedFileContent
    ) {
+      if ($null -eq $SubbedFileContent) {
+         throw "Parameter -SubbedFileContent with string representing substituted content is required"
+      }
+      New-Item -Path Nothing.text
       $key = $null
       $filePathData = Get-Item $OriginalSourceFilePath | Select-Object *
       $subbedFileName = $filePathData.PSParentPath + "\" + $filePathData.BaseName + $this.SubbingString + $filePathData.Extension
@@ -280,6 +283,7 @@ class SubbedFileInfoList {
          SubbedPathFile = $subbedFileName
          Key = $key
       })
+
       return $key
    }
 

@@ -1,10 +1,11 @@
 
 "use strict";
 /* jshint -W069 */
-
+/*
 import { SPListREST } from '../../SPREST/src/SPListREST';
 import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
 import { SiteUrl } from './liblisting';
+*/
 
 const
    server = "https://cawater.sharepoint.com",
@@ -61,7 +62,7 @@ function specialMetadataCopy(): void {
             body: body
          });
       }
-      SPRESTSupportLib.batchRequestingQueue({
+      batchRequestingQueue({
          AllMethods: "PATCH",
          AllHeaders: {
             "Content-Type": "application/json;odata=verbose",
@@ -69,14 +70,14 @@ function specialMetadataCopy(): void {
          },
          host: "cawater.sharepoint.com",
          path: "/teams/comm-cpr"
-      }, requests).then((response) => {
+      }, requests).then((response: any) => {
          console.log(typeof response == "object" ? JSON.stringify(response, null, "  ") : response);
          alert("All done");
-      }).catch((response) => {
+      }).catch((response: any) => {
          console.log(typeof response == "object" ? JSON.stringify(response, null, "  ") : response);
          alert("error!");
       });
-   }).catch((response) => {
+   }).catch((response: any) => {
       console.log(typeof response == "object" ? JSON.stringify(response, null, "  ") : response);
       alert("error!");
    });
@@ -91,7 +92,7 @@ function getBatchResults() {
          url: server + site + "/_api/web/lists/getByTitle('" + list + "')/items(" +
                (Math.random() * 5000) + ")"
       });
-      SPRESTSupportLib.batchRequestingQueue({
+      batchRequestingQueue({
       AllMethods: "GET",
       AllHeaders: {
          "Accept": "application/json;odata=verbose",
@@ -99,9 +100,9 @@ function getBatchResults() {
       },
       host: "cawater.sharepoint.com",
       path: "/teams/comm-cpr"
-   }, requests).then((response) => {
+   }, requests).then((response: any) => {
       console.log(response);
-   }).catch((response) => {
+   }).catch((response: any) => {
       console.log(response);
    });
 }
@@ -122,7 +123,7 @@ function copylist(buttonObj: HTMLButtonElement) {
 }
 
 function copyFiles() {
-   SPRESTSupportLib.RESTrequest({
+   RESTrequest({
          url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/getByTitle('PSMP')" +
                "/items/?$filter=Created ge datetime'2021-02-18T08:00:00.000Z'&$expand=File",
          method: "GET",
@@ -150,7 +151,7 @@ function copyFiles() {
                      folNames[i] = folNames[i].match(/[\d\.]+\s*\-\s*(.*)/)![1];
                      metadata["Level_x0020_" + (i + 1)] =  folNames[i];
                }
-               formattedMetadata = SPRESTSupportLib.formatRESTBody(metadata);
+               formattedMetadata = formatRESTBody(metadata);
                fileData.push({
                      name: item.File.Name,
                      folderRelativeUrl: "https://cawater.sharepoint.com/teams/swp-dom/RSO/PSMP",
@@ -160,22 +161,21 @@ function copyFiles() {
             }
 
             for (let file of fileData)
-               SPRESTSupportLib.RESTrequest({
+               RESTrequest({
                      setDigest: true,
                      url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/folders/getByUrl('" +
                         file.folderRelativeUrl + "')/files/getByUrl('" + file.fileRelativeUrl +
                         "')/copyTo('" + newUrlPrefix + "', false)",
                      method: "POST",
-                     successCallback: (data) => {
+                     successCallback: (data: any) => {
                         console.log(JSON.stringify(data, null, "  "));
                      },
-                     errorCallback: (reqObj) => {
+                     errorCallback: (reqObj: JQueryXHR) => {
                         console.log(JSON.stringify(reqObj, null, "  "));
                      }
                });
          },
-         errorCallback: (reqObj, url) => {
-            console.log("URL => " + url);
+         errorCallback: (reqObj: JQueryXHR) => {
             console.log(JSON.stringify(reqObj, null, "  "));
          }
    });
@@ -233,7 +233,7 @@ function themeRequest(
       requestProperties.name = name;
    if (properties)
       requestProperties.themeJson = properties;
-   SPRESTSupportLib.RESTrequest({
+   RESTrequest({
       setDigest: true,
       url: SiteUrl + "/_api/ThemeManager/" + themeAction,
       method: "POST",
@@ -242,10 +242,10 @@ function themeRequest(
          "Content-Type": "application/json;odata=verbose",
       },
       data: JSON.stringify(requestProperties),
-      successCallback: (data/*, text, reqObj */) => {
+      successCallback: (data: any/*, text, reqObj */) => {
 
       },
-      errorCallback: (reqObj/*, status, errThrown */) => {
+      errorCallback: (reqObj: JQueryXHR/*, status, errThrown */) => {
 
       }
    });

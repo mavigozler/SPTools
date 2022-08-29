@@ -1,7 +1,9 @@
 "use strict";
 
+/*
 import * as SPRESTTypes from '../../SPREST/src/SPRESTtypes';
 import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
+*/
 
 const prefix = "WPQ5",
 	stdHeaders =  {
@@ -42,11 +44,11 @@ function sendRequest(form: HTMLFormElement) {
 
 	function editedRequest(params: {
 		url: string;
-		method: SPRESTTypes.THttpRequestMethods;
-		headers: SPRESTTypes.THttpRequestHeaders;
+		method: THttpRequestMethods;
+		headers: THttpRequestHeaders;
 		body: string;
 	}): void {
-		SPRESTSupportLib.RESTrequest({
+		RESTrequest({
 			url: params.url,
 			method: params.method!,
 			headers: params.headers,
@@ -57,7 +59,7 @@ function sendRequest(form: HTMLFormElement) {
 				storeRequestData(form);
 				loadPreviousData();
 			},
-			errorCallback: (reqObj, status, errThrown) => {
+			errorCallback: (reqObj: JQueryXHR, status?: string, errThrown?: string) => {
 				form[SPChromePrefix + "response"].value =
 					"URL: " + //this.url +
 					"\nError thrown: " + errThrown +
@@ -92,10 +94,10 @@ function sendRequest(form: HTMLFormElement) {
 	if (form[SPChromePrefix + "xdigest"].checked == true) {
 		let match: RegExpMatchArray | null = finalUrl.match(/(.*\/_api)/);
 
-		SPRESTSupportLib.RESTrequest({
+		RESTrequest({
 			url: match![1] + "/contextinfo",
 			method: "POST",
-			headers: {...stdHeaders} as SPRESTTypes.THttpRequestHeaders,
+			headers: {...stdHeaders} as THttpRequestHeaders,
 			successCallback: function (data) {
 				let formDigestValue = data.d!.GetContextWebInformation!.FormDigestValue;
 					// SharePoint
@@ -103,7 +105,7 @@ function sendRequest(form: HTMLFormElement) {
 				(formDigestValueNode as HTMLInputElement).value = formDigestValue;
 				editedRequest({
 					url: finalUrl,
-					method: SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]) as SPRESTTypes.THttpRequestMethods,
+					method: getCheckedInput(form[SPChromePrefix + "method"]) as THttpRequestMethods,
 					headers: headers,
 					body: form[SPChromePrefix + "body"].value
 				});
@@ -124,7 +126,7 @@ function sendRequest(form: HTMLFormElement) {
 	} else
 		editedRequest({
 			url: finalUrl,
-			method: SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]) as SPRESTTypes.THttpRequestMethods,
+			method: getCheckedInput(form[SPChromePrefix + "method"]) as THttpRequestMethods,
 			headers: headers,
 			body: form[SPChromePrefix + "body"].value
 		});
@@ -234,7 +236,7 @@ function setupMethod(inputObj: any, fromXDigest: boolean = false): number {
 	if (fromXDigest == true)
 		value = inputObj.value;
 	else
-		value = SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]) as string;
+		value = getCheckedInput(form[SPChromePrefix + "method"]) as string;
 	if (value == "POST") { // creation of headers
 		for (let i = 0; i < postHeaders.length; i++) {
 			if (postHeaders[i].name == "X-HTTP-METHOD") {
@@ -278,7 +280,7 @@ function setupMethod(inputObj: any, fromXDigest: boolean = false): number {
 function setupXDigest(inputObj: HTMLInputElement) {
 	const form = inputObj.form as HTMLFormElement,
 //		headersNode: HTMLElement = document.getElementById("headers"),
-		selectedMethod = SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]);
+		selectedMethod = getCheckedInput(form[SPChromePrefix + "method"]);
 
 	let node: HTMLElement,
 		headersCount: number = 0;
@@ -316,7 +318,7 @@ function storeRequestData(form: HTMLFormElement) {
 	let reqtable: string[] | string | null,
 		data = JSON.stringify({
             url: form[SPChromePrefix + "url"].value,
-            method: SPRESTSupportLib.getCheckedInput(form[SPChromePrefix + "method"]),
+            method: getCheckedInput(form[SPChromePrefix + "method"]),
             select: form[SPChromePrefix + "ODataSelect"].value,
             filter: form[SPChromePrefix + "ODataFilter"].value,
             expand: form[SPChromePrefix + "ODataExpand"].value,
@@ -351,7 +353,7 @@ function fillPrevious(selectObj: HTMLSelectElement) {
 		data = JSON.parse(selectObj.options[selectObj.selectedIndex].value);
 
 	form[SPChromePrefix + "url"].value = data.url;
-	SPRESTSupportLib.setCheckedInput(form[SPChromePrefix + "method"], data.method);
+	setCheckedInput(form[SPChromePrefix + "method"], data.method);
 	form[SPChromePrefix + "ODataSelect"].value = data.select;
 	form[SPChromePrefix + "ODataFilter"].value = data.filter;
 	form[SPChromePrefix + "ODataExpand"].value = data.expand;

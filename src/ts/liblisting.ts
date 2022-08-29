@@ -1,10 +1,17 @@
 "use strict";
 
+type makeTableHeaderObject = {
+   title: string;
+   style: string;
+}
+
+/*
 import { SPSiteREST } from '../../SPREST/src/SPSiteREST';
 import { SPListREST } from '../../SPREST/src/SPListREST';
 import * as SPRESTSupportLib from '../../SPREST/src/SPRESTSupportLib';
 import * as SPRESTTypes from '../../SPREST/src/SPRESTtypes';
 import * as SPTools from './SPTools';
+*/
 
 const SERVER_NAME = location.origin,
     SITE_NAME = "/teams/swp-dom/RSO/CPR",
@@ -14,9 +21,17 @@ const SERVER_NAME = location.origin,
 	LIST_FILES_ONLY = 0x0002,
 	INCLUDE_ID_IN_LISTING = 0x0004,
 	SORT_LISTING_BY_ID = 0x0008,
-	ROW_NUMBERING = 0x0010;
+	ROW_NUMBERING = 0x0010,
 
-export let LibListingForm: HTMLFormElement,
+   FILE_SYSTEM_OBJECT_TYPE_FILE = 0,
+   FILE_SYSTEM_OBJECT_TYPE_FOLDER = 1;
+
+const BOX_DRAWINGS_LIGHT_VERTICAL_AND_RIGHT = '\u251c',  //  ├
+      BOX_DRAWINGS_LIGHT_VERTICAL = '\u2502',  //  │
+      BOX_DRAWINGS_LIGHT_HORIZONTAL = '\u2500',  //  ─
+      BOX_DRAWINGS_LIGHT_UP_AND_RIGHT = '\u2514';  // └
+
+let LibListingForm: HTMLFormElement,
     SiteUrl: string,
 	 ListingOptions: number = 0x0000;
 
@@ -27,6 +42,7 @@ type libItem = {
 //   folderPath: string;
    originalUrl: string;
    relativeUrl: string;
+   parentPath?: string;
    size: number;
    created: Date;
    modified: Date;
@@ -87,7 +103,32 @@ function simplifyFileSize(size: number): string | undefined {
    	return (size / 1024).toFixed(0).toString() + " KB";
 }
 
-export function listingOp(
+// returns a RELATIVE URL
+function findItemUrl(SPitem: any, siteName: string, parent?: boolean): string {
+   let relUrl: string,
+      isFile: boolean;
+//      start: number,
+//      url: string;
+
+   if ((relUrl = SPitem.File.ServerRelativeUrl) == null) {
+      relUrl = SPitem.Folder.ServerRelativeUrl;
+      isFile = false;
+   } else
+      isFile = true;
+   if (isFile == true && parent == true)
+      relUrl = relUrl.substring(0, relUrl.lastIndexOf("/"));
+//   start = siteName.length - siteName.match(/(https:\/\/[^\/]+)\//)![1].length;
+//   start += relUrl.substring(start).match(/(\/[^\/]+)/)![1].length;
+//   if (isFile == true)
+//      url = SPitem.File.ServerRelativeUrl.substr(start,
+//            SPitem.File.ServerRelativeUrl.length - start - SPitem.File.Name.length);
+//   else
+//      url = SPitem.Folder.ServerRelativeUrl.substr(start,
+//            SPitem.Folder.ServerRelativeUrl.length - start - SPitem.Folder.Name.length);
+   return relUrl;
+}
+
+function listingControl(
 	which: string | URLSearchParams,
 	LibListingForm: HTMLFormElement
 ): void {
@@ -96,9 +137,10 @@ export function listingOp(
          listingFunc: string | null = null,
          queryParts: URLSearchParams | null = null,
          insertionPoint: HTMLDivElement,
-         parentNode: HTMLElement = LibListingForm.parentNode! as HTMLElement,
+         parentNode: HTMLElement = LibListingForm.parentNode! as HTMLElement;
+/*
 			options: TListingOptions = {},
-			dpage: string | null;
+			dpage: string | null;  */
 
    if (typeof which == "string")
       listingFunc = which as unknown as string;
@@ -108,100 +150,91 @@ export function listingOp(
       if (listingFunc == null)
          return alert("The use of a URL to invoke functionality requires that 'listingfunc' name be set with a valid value");
       if ((value = queryParts.get("displaypage")) != null)
-         SPTools.displayPage(value);
+         displayPage(value);
    }
 
    insertionPoint = parentNode.appendChild(document.createElement("div"));
+   LibListingForm.style.display = "none";
+   document.createElement("show-libform").style.display = "block";
 	switch (listingFunc.toLowerCase()) {
    case "findfilediff":
-      if (queryParts)
-         findFileDifferences(
-            queryParts.get("lib1sitepath") as string,
-            queryParts.get("lib1name") as string,
-            queryParts.get("lib2sitepath") as string,
-            queryParts.get("lib2name") as string,
-            insertionPoint
-         );
-      else
-         findFileDifferences(
-            LibListingForm.Lib1SitePath.value,
-            LibListingForm.Lib1Name.value,
-            LibListingForm.Lib2SitePath.value,
-            LibListingForm.Lib2Name,
-            insertionPoint
-         );
+      if (queryParts) {
+         LibListingForm.Lib1SitePath.value = queryParts.get("lib1sitepath");
+         LibListingForm.Lib1Name.value = queryParts.get("lib1name");
+         LibListingForm.Lib2SitePath.value = queryParts.get("lib2sitepath");
+         LibListingForm.Lib2Name = queryParts.get("lib2name");
+      }
+      findFileDifferences(
+         LibListingForm.Lib1SitePath.value,
+         LibListingForm.Lib1Name.value,
+         LibListingForm.Lib2SitePath.value,
+         LibListingForm.Lib2Name,
+         insertionPoint
+      );
       break;
    case "duplicatelisting":
-      if (queryParts) {
-         LibListingForm.SiteNameDuplicates.value =  queryParts.get("sitenamedups");
-         LibListingForm.LibraryNameDuplicates.value = queryParts.get("libnamedups");
-         if (duplicateListing(
-            LibListingForm.SiteNameDuplicates.value,
-            LibListingForm.LibraryNameDuplicates.value,
-            insertionPoint
-         ) == false)
-            return alert("To use duplicate listing function, the query string must be of the form " +
-                  "'?callfunc=DuplicateListing&siteURL=<site-url>&libName=<lib-name>&displaypage=liblist-container'");
-      } else {
-         if (duplicateListing(
-            LibListingForm.SiteNameDuplicates.value,
-            LibListingForm.LibraryNameDuplicates.value,
-            insertionPoint
-         ) == false)
-            return alert("To use duplicate listing function, the query string must be of the form " +
-                  "'?callfunc=DuplicateListing&siteURL=<site-url>&libName=<lib-name>&displaypage=liblist-container'");
-      }
+      if (queryParts && ((LibListingForm.SiteNameDuplicates.value =  queryParts.get("sitenamedups")) == null ||
+                  (LibListingForm.LibraryNameDuplicates.value = queryParts.get("libnamedups"))) == null)
+         return alert("To use duplicate listing function, the query string must be of the form " +
+               "'?callfunc=DuplicateListing&siteURL=<site-url>&libName=<lib-name>&displaypage=liblist-container'");
+      listingOp(
+         "fileduplicates",
+         LibListingForm.SiteNameDuplicates.value,
+         LibListingForm.LibraryNameDuplicates.value,
+         null,
+         insertionPoint
+      );
       break;
 	case "makelibcopy":
-      if (queryParts) {
-         if (queryParts.get("server") == null || queryParts.get("site") == null ||
-                  queryParts.get("sourceLib") == null || queryParts.get("destLib") == null)
-            return alert("To use copy library function, the query string must be of the form:\n\n" +
+      if (queryParts && ((queryParts.get("server") == null || queryParts.get("site") == null ||
+                  queryParts.get("sourceLib") == null || queryParts.get("destLib") == null)))
+         return alert("To use copy library function, the query string must be of the form:\n\n" +
                   "'?listingfunc=makelibcopy&\n" +
                   "sourcesitecopy=<source-site-url>&\n"  +
                   "sourcenamecopy=<source-list-name>&\n" +
                   "destsitecopy=<dest-site-url>&\n" +
                   "destnamecopy<dest-list-name>'");
-         siteREST = new SPSiteREST({
-            server: SERVER_NAME,
-            site: SITE_NAME!
+      siteREST = new SPSiteREST({
+         server: SERVER_NAME,
+         site: SITE_NAME!
+      });
+      siteREST.init().then(() => {
+         siteREST.makeLibCopyWithItems(
+            queryParts!.get("sourceLib") as string,
+            queryParts!.get("destSite") as string,
+            queryParts!.get("destLib") as string
+         ).then((response: any) => {
+            alert("Success: " + response);
+         }).catch((response: any) => {
+            alert("Failure: " + response);
          });
-         siteREST.init().then(() => {
-            siteREST.makeLibCopyWithItems(
-               queryParts!.get("sourceLib") as string,
-               queryParts!.get("destSite") as string,
-               queryParts!.get("destLib") as string
-            ).then((response) => {
-               alert("Success: " + response);
-            }).catch((response) => {
-               alert("Failure: " + response);
-            });
-         }).catch((response) => {
-            alert("Failure to initialize" + response);
-         });
-      } else {
-
-      }
+      }).catch((response: any) => {
+         alert("Failure to initialize" + response);
+      });
 		break;
    case "listfoldersandfiles":
       if (queryParts) {
          LibListingForm.SiteNameDuplicates.value =  queryParts.get("siteurl");
          LibListingForm.LibraryNameDuplicates.value = queryParts.get("libname");
-         listFoldersAndFiles(
-            LibListingForm.SiteNameDuplicates.value,
-            LibListingForm.LibraryNameDuplicates.value,
-            insertionPoint
-         );
       }
+      listingOp(
+         "foldersWithTheirFiles",
+         LibListingForm.SiteNameDuplicates.value,
+         LibListingForm.LibraryNameDuplicates.value,
+         null,
+         insertionPoint
+      );
       break;
    case "speciallisting":
-      if (queryParts) {
-         specialListing(
+      LibListingForm.style.display = "none";  // tun off the form for this one
+      if (queryParts)
+         listingOp(
+            "searchParametersListing",
             queryParts.get("siteurl")!,
             queryParts.get("libname")!,
+            queryParts.get("options"),
             insertionPoint
          );
-      }
       break;
    }
 }
@@ -254,151 +287,6 @@ function generateURL(which: string): void {
    }
 }
 
-function duplicateListing(
-   siteName: string,
-   libName: string,
-   insertionPoint: HTMLDivElement
-): boolean {
-   let select: string = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",
-         expand: string = "File,Folder",
-         leadingPath: RegExpMatchArray | null | string;
-
-	if (siteName.length == 0)
-		return false;
-   if ((leadingPath = siteName.match(/https:\/\/[^\/]+(\/.*)$/)) == null)
-      return false;
-   leadingPath = leadingPath[1] as string;
-
-   document.getElementById("working")!.style.display = "inline-block";
-   SPRESTSupportLib.RESTrequest({
-      url: siteName + "/_api/web/lists/getByTitle('" + libName + "')/items" +
-          "?$select=" + select + "&$expand=" + expand,
-      method: "GET",
-      headers: {
-          "Accept": "application/json;odata=verbose",
-          "Content-Type": "application/json;odata=verbose",
-      },
-      successCallback: (data: any /*, text, reqObj */) => {
-         let files: libItem[] = [],
-            folders: libItem[] = [],
-            start: number,
-            relUrl: string,
-            dupFiles: libItem[] = [],
-            dupFolders: libItem[] = [],
-            duping: boolean = false,
-            libParts: RegExpMatchArray,
- //           libPart: string,
-            pElem: HTMLParagraphElement,
-            sElem: HTMLSpanElement;
-
-         // compute the start index
-         libParts = data[0].File.ServerRelativeUrl.match(leadingPath);
-//         libPart = libParts[0] + libParts.input!.substring(
-//               libParts[0].length,
-//               libParts[0].length + 1 + libParts.input!.substring(libParts[0].length + 1).search(/\//)
-//            );
-         start = siteName.length - siteName.match(/(https:\/\/[^\/]+)\//)![1].length;
-         if ((relUrl = data[0].File.ServerRelativeUrl) == null)
-            relUrl = data[0].Folder.ServerRelativeUrl;
-         start += relUrl.substring(start).match(/(\/[^\/]+)/)![1].length;
-         for (let datum of data)
-            if (datum.FileSystemObjectType == 0)
-               files.push({
-                  id: datum.Id,
-                  name: datum.File.Name,
-                  type: 0,
-                  originalUrl: datum.File.ServerRelativeUrl,
-                  relativeUrl: datum.File.ServerRelativeUrl.substr(start,
-                           datum.File.ServerRelativeUrl.length - start - datum.File.Name.length),
-   //               folderPath: datum.File.ServerRelativeUrl.substring(libPart.length, datum.File.ServerRelativeUrl.lastIndexOf("/") + 1),
-                  size: datum.File.Length,
-                  created: datum.Created,
-                  modified: datum.Modified,
-                  tag: ""
-               });
-            else
-               folders.push({
-                  id: datum.Id,
-                  name: datum.Folder.Name,
-                  type: 1,
-                  originalUrl: datum.Folder.ServerRelativeUrl,
-                  relativeUrl: datum.Folder.ServerRelativeUrl.substr(start,
-                           datum.Folder.ServerRelativeUrl.length - start - datum.Folder.Name.length),
-    //              folderPath: datum.Folder.ServerRelativeUrl.substring(libPart.length, datum.Folder.ServerRelativeUrl.lastIndexOf("/") + 1),
-                  size: -1,
-                  created: datum.Created,
-                  modified: datum.Modified,
-                  tag: ""
-               });
-
-         files.sort((a: any, b: any) => {
-            return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
-         });
-
-         for (let i = 0; i < files.length - 1; i++)
-            if (files[i].name == files[i + 1].name) {
-               dupFiles.push(files[i]);
-               duping = true;
-            } else if (duping == true) {
-               dupFiles.push(files[i]);
-               duping = false;
-            }
-
-         makeTable({
-            title: "Replicate File Names in " + libName,
-            subtitle: "(Site: " + siteName + ")",
-            headers: [ "ID", "File Name", "Folder Path", "Size", "Created", "Modified" ],
-            display: [
-               () => { return "$$id" },
-               () => { return "$$name" },
-               () => { return "$$folderPath" },
-               () => { return "$$size" },
-               (item) => { return new Date(item.created).toLocaleDateString() },
-               (item) => { return new Date(item.modified).toLocaleDateString() },
-               ],
-            data: dupFiles,
-            attach: insertionPoint,
-            options: ["addCounter{1}"]
-         });
-
-         folders.sort((a: any, b: any) => {
-            return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
-         });
-
-         for (let i = 0; i < folders.length - 1; i++)
-            if (folders[i].name == folders[i + 1].name) {
-               dupFolders.push(folders[i]);
-               duping = true;
-            } else if (duping == true) {
-               dupFolders.push(folders[i]);
-               duping = false;
-            }
-
-         makeTable({
-            title: "Replicate Folder Names in " + libName,
-            subtitle: "(Site: " + siteName + ")",
-            headers: [ "ID", "Folder Name", "Folder Path", "Created", "Modified" ],
-            display: [
-               () => { return "$$id" },
-               () => { return "$$name" },
-               () => { return "$$folderPath" },
-               (item) => { return new Date(item.created).toLocaleDateString() },
-               (item) => { return new Date(item.modified).toLocaleDateString() },
-               ],
-            data: dupFolders,
-            attach: insertionPoint,
-            options: ["addCounter{1}"]
-         });
-         document.getElementById("working")!.style.display = "none";
-      },
-      errorCallback: (reqObj: JQueryXHR) => {
-         alert("Error on library request:\n\n" +
-            JSON.stringify(reqObj, null, "  "));
-      }
-   });
-   return true;  // only applies to validity of arguments
-}
-
 function errorInput(message: string): void {
    alert(message);
 }
@@ -415,7 +303,7 @@ function copyLibrary() {
     if (LibListingForm.DestNameCopy.value.length == 0)
         return errorInput("Missing valid name for destination library for copy");
     srcSiteREST = new SPSiteREST({
-        server: SPRESTSupportLib.ParseSPUrl(location.origin)!.server,
+        server: ParseSPUrl(location.origin)!.server,
         site: LibListingForm.SourceSiteCopy.value
      });
     if (srcSiteREST == null)
@@ -425,12 +313,12 @@ function copyLibrary() {
            LibListingForm.SourceNameCopy.value,
            LibListingForm.DestSiteCopy.value,
            LibListingForm.DestNameCopy.value
-        ).then((response) => {
+        ).then((response: any) => {
            alert("Success: " + response);
-        }).catch((response) => {
+        }).catch((response: any) => {
            alert("Failure: " + response);
         });
-    }).catch((response) => {
+    }).catch((response: any) => {
         alert("Failure to initialize" + response);
     });
 }
@@ -461,7 +349,7 @@ function findFileDifferences(
         return errorInput("Missing valid path URL to site for library 2");
     if (lib2Name.length == 0)
         return errorInput("Missing valid name for library 2");
-    SPRESTSupportLib.RESTrequest({
+    RESTrequest({
         url: lib1SitePath + "/_api/web/lists/getByTitle('" + lib1Name +  "')/items" +
             "?$select=" + selectExpr + "&$expand=" + expandExpr,
         method: "GET",
@@ -518,7 +406,7 @@ function findFileDifferences(
             L1Folders.sort((a: any, b: any) => {
                return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
            });
-           SPRESTSupportLib.RESTrequest({
+           RESTrequest({
             url: LibListingForm.Lib2SitePath.value + "/_api/web/lists/getByTitle('" + LibListingForm.Lib2Name.value +  "')/items" +
                   "?$select=" + selectExpr + "&$expand=" + expandExpr,
                  method: "GET",
@@ -526,7 +414,7 @@ function findFileDifferences(
                     "Accept": "application/json;odata=verbose",
                     "Content-Type": "application/json;odata=verbose",
                 },
-                successCallback: (data: SPRESTTypes.TSPResponseData/*, text, reqObj */) => {
+                successCallback: (data: TSPResponseData/*, text, reqObj */) => {
                   let   L2Files: libItem[] = [],
                         L2Folders: libItem[] = [],
    //                     checkTag: string,
@@ -796,246 +684,22 @@ function findFileDifferences(
                 document.getElementById("working")!.style.display = "none";
 
                },
-                errorCallback: (reqObj) => {
+                errorCallback: (reqObj: JQueryXHR) => {
                   alert("Error on Library 2 request:\n\n" +
                         JSON.stringify(reqObj, null, "  "));
                 }
             });
         },
-        errorCallback: (reqObj/*, status, errThrown */) => {
+        errorCallback: (reqObj: JQueryXHR/*, status, errThrown */) => {
          alert("Error on Library 1 request:\n\n" +
             JSON.stringify(reqObj, null, "  "));
       }
    });
 }
 
-function listFoldersAndFiles(
-   siteName: string,
-   libName: string,
-   insertionPoint: HTMLDivElement
-) {
-   let select: string = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",
-         expand: string = "File,Folder",
-         leadingPath: RegExpMatchArray | null | string;
-
-   if (siteName.length == 0)
-		return false;
-   if ((leadingPath = siteName.match(/https:\/\/[^\/]+(\/.*)$/)) == null)
-      return false;
-   leadingPath = leadingPath[1] as string;
-
-   document.getElementById("working")!.style.display = "inline-block";
-   SPRESTSupportLib.RESTrequest({
-      url: siteName + "/_api/web/lists/getByTitle('" + libName + "')/items" +
-      "?$select=" + select + "&$expand=" + expand,
-      method: "GET",
-      headers: {
-         "Accept": "application/json;odata=verbose",
-         "Content-Type": "application/json;odata=verbose"
-      },
-      successCallback: (data: any /*, text, reqObj */) => {
-         let files: libItem[] = [],
-            folders: libItemEx[] = [],
-            start: number,
-            relUrl: string,
-            sortedItems: {
-               id: number;
-               name: string;
-               href: string;
-               size: number;
-               created: Date;
-               modified: Date;
-               type: 0 | 1 | 2;
-            }[] = [],
-            pElem: HTMLParagraphElement,
-            ulElem: HTMLUListElement,
-            liElem: HTMLLIElement,
-            boldElem: HTMLElement
-
-         // compute the start index
-         if ((relUrl = data[0].File.ServerRelativeUrl) == null)
-            relUrl = data[0].Folder.ServerRelativeUrl;
-         start = siteName.length - siteName.match(/(https:\/\/[^\/]+)\//)![1].length;
-         start += relUrl.substring(start).match(/(\/[^\/]+)/)![1].length;
-         for (let datum of data)
-            if (datum.FileSystemObjectType == 0)
-               files.push({
-                  id: datum.Id,
-                  name: datum.File.Name,
-                  type: 0,
-                  originalUrl: datum.File.ServerRelativeUrl,
-                  relativeUrl: datum.File.ServerRelativeUrl.substr(start,
-                           datum.File.ServerRelativeUrl.length - start - datum.File.Name.length),
-                  size: datum.File.Length,
-                  created: datum.Created,
-                  modified: datum.Modified,
-                  tag: ""
-               });
-            else
-               folders.push({
-                  id: datum.Id,
-                  name: datum.Folder.Name,
-                  type: 1,
-                  originalUrl: datum.Folder.ServerRelativeUrl,
-                  relativeUrl: datum.Folder.ServerRelativeUrl.substr(start,
-                           datum.Folder.ServerRelativeUrl.length - start - datum.Folder.Name.length),
-                  size: -1,
-                  created: datum.Created,
-                  modified: datum.Modified,
-                  tag: "",
-                  itsFiles: [],
-                  itsFolders: []
-               });
-/*
-         for (let j, i = 0, k = 0; i < 2000; i++) {
-            if (files[i].relativeUrl == "/")
-               continue;
-            k++;
-            console.log("file Path = '" + files[i].relativeUrl + "'");
-            for (j = 0; j < folders.length; j++) {
-  //             console.log("folder Path = '" + folders[j].folderPath + folders[j].name + "'");
-               if (files[i].relativeUrl == folders[j].relativeUrl + folders[j].name + "/")
-                  break;
-            }
-            console.log("Folders counted in pass: " + j);
-         } */
-         {  let found: boolean,
-               rootFolder: libItemEx = {
-                  id: -1,
-                  name: "*** Root Folder ***",
-                  itsFiles: [],
-                  itsFolders: [],
-                  type: 1,
-                  size: -1,
-                  tag: "",
-                  originalUrl: relUrl,
-                  relativeUrl: "/",
-                  created: new Date(0),
-                  modified: new Date(0)
-               };
-
-            for (let file of files) {
-               found = false;
-               for (let folder of folders)
-                  if (file.relativeUrl == folder.relativeUrl + folder.name + "/") {
-                     folder.itsFiles.push(file);
-                     found = true;
-                     break;
-                  }
-               if (found == false)
-                  rootFolder.itsFiles.push(file);
-            }
-            for (let folder1 of folders)
-               for (let folder2 of folders)
-                  if (folder1.relativeUrl == folder2.relativeUrl + folder2.name + "/")
-                     folder2.itsFolders.push(folder1);
-            for (let folder of folders)
-               if (folder.relativeUrl == "/")
-                  rootFolder.itsFolders.push(folder);
-            folders.push(rootFolder);
-         }
-         // put 'Archive' folders first
-         {
-            let tempFolders1: libItemEx[] = [],
-                  tempFolders2: libItemEx[] = [];
-
-            for (let folder of folders)
-               if (folder.name.search(/Archive/i) >= 0)
-                  tempFolders1.push(folder);
-               else
-                  tempFolders2.push(folder);
-            folders = tempFolders1.concat(tempFolders2);
-         }
-
-         // final listing with folders out
-         for (let folder of folders) {
-            sortedItems.push({
-               id: folder.id,
-               name: folder.name,
-               href: folder.originalUrl,
-               size: -1,
-               created: folder.created,
-               modified: folder.modified,
-               type: folder.type
-            });
-            for (let subfolder of folder.itsFolders)
-               sortedItems.push({
-                  id: subfolder.id,
-                  name: subfolder.name,
-                  href: "",
-                  size: subfolder.size,
-                  created: subfolder.created,
-                  modified: subfolder.modified,
-                  type: 2
-               });
-            for (let file of folder.itsFiles)
-               sortedItems.push({
-                  id: file.id,
-                  name: file.name,
-                  href: "",
-                  size: file.size,
-                  created: file.created,
-                  modified: file.modified,
-                  type: file.type
-               });
-         }
-
-         pElem = document.createElement("p");
-         insertionPoint.appendChild(pElem);
-         pElem.appendChild(document.createTextNode("For this document library:"));
-
-         ulElem = document.createElement("ul");
-         insertionPoint.appendChild(ulElem);
-
-         liElem = document.createElement("li");
-         ulElem.appendChild(liElem);
-         liElem.appendChild(document.createTextNode("Folder count: "));
-         boldElem = document.createElement("b");
-         liElem.appendChild(boldElem);
-         boldElem.appendChild(document.createTextNode(folders.length.toString()));
-
-         liElem = document.createElement("li");
-         ulElem.appendChild(liElem);
-         liElem.appendChild(document.createTextNode("File count: "));
-         boldElem = document.createElement("b");
-         liElem.appendChild(boldElem);
-         boldElem.appendChild(document.createTextNode(files.length.toString()));
-
-         makeTable({
-            title: "Folders and The Files in " + libName,
-            subtitle: "(Site: " + siteName + ")",
-            headers: [ "ID", "Folder of File Name", "Size", "Created", "Modified" ],
-            display: [
-               () => { return "$$id" },
-               (item) => { return {
-                     attrib: item.type == 0 ? "class=right italic" :
-                           item.type == 1 ? "class=bold" : "class=right green bold",
-                     iValue: "$$name",
-                     wrapLink: item.href
-                  }
-               },
-               (item) => { return item.type == 2 ? "subfolder" : item.size == -1 ? "" :
-                     item.size > (1024 * 1024) ? Math.floor(item.size / (1024 * 1024)) + " MB [ $$size ]" :
-                     item.size > 1024 ? Math.floor(item.size / 1024) + " KB [ $$size ]" :
-                     "$$size" },
-               (item) => { return new Date(item.created).toLocaleDateString() },
-               (item) => { return new Date(item.modified).toLocaleDateString() },
-               ],
-            data: sortedItems,
-            attach: insertionPoint,
-            options: ["addCounter{1}"]
-         });
-         document.getElementById("working")!.style.display = "none";
-      },
-      errorCallback: (reqObj/*, status, errThrown */) => {
-
-      }
-   });
-}
-
 /*
 function ReliabilityStandardValuesCheck() {  // provides listing of Reliability STd column multiple values and counnts
-    SPRESTSupportLib.RESTrequest({
+    RESTrequest({
         url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/CPR/_api/web/lists/getByTitle('O&P Evidence_Copy')/items" +
             "?$select=Id,Reliability_x0020_Standard,FileSystemObjectType",
         method: "GET",
@@ -1201,7 +865,7 @@ function clearErrors(): void {
  *      .options: string[]
  */
 function makeTable(params: {
-    headers: string[];
+    headers: (string | makeTableHeaderObject)[] ;
     display: ((arg?: any) => string |
       {
          attrib: string;
@@ -1213,7 +877,7 @@ function makeTable(params: {
     options: string[];
     title?: string;
     subtitle?: string;
-}) {
+}): void {
    const ADD_COUNTER: number = 0x0001;
    let tblNode: HTMLTableElement,
         trNode: HTMLTableRowElement,
@@ -1228,7 +892,7 @@ function makeTable(params: {
             },
         cItem: { [key:string]: string;},
         options = 0x0000,
-
+        headerTitle: string,
         counterColumn = -1,
         matches,
         counter = 0;
@@ -1275,7 +939,25 @@ function makeTable(params: {
       }
       tdNode = document.createElement("th");
       trNode.appendChild(tdNode);
-      tdNode.appendChild(document.createTextNode(params.headers[i]));
+      if (typeof params.headers[i] == "string")
+         headerTitle = params.headers[i] as string;
+      else {
+         headerTitle = (params.headers[i] as makeTableHeaderObject).title;
+         tdNode.setAttribute("style", (params.headers[i] as makeTableHeaderObject).style);
+      }
+      tdNode.appendChild(document.createTextNode(headerTitle));
+   }
+   if (params.data.length == 0) {
+      trNode = document.createElement("tr");
+      tblNode.appendChild(trNode);
+      tdNode = document.createElement("td");
+      trNode.appendChild(tdNode);
+      tdNode.setAttribute("colspan", params.headers.length.toString() + 1);
+      tdNode.appendChild(document.createTextNode("No items were marked for display in the table"));
+      tdNode.style.fontWeight = "bold";
+      tdNode.style.fontSize = "150%";
+      tdNode.style.color = "red";
+      return;
    }
    for (let item of params.data) {
       trNode = document.createElement("tr");
@@ -1299,9 +981,12 @@ function makeTable(params: {
                tdNode.appendChild(document.createTextNode(value));
          } else {
             // value is object
-            if (value.iValue.search(/\$\$/) >= 0)
-               setCellValue(item, value.iValue, value.wrapLink!);
-            if (value.attrib.length > 0) {
+            if (typeof value.iValue == "string") {
+               if (value.iValue.search(/\$\$/) >= 0)
+                  setCellValue(item, value.iValue, value.wrapLink!);
+               else
+                  tdNode.appendChild(document.createTextNode(value.iValue));
+            } if (value.attrib.length > 0) {
                let attribs: string[],
                   attribName: string,
                   attribVal: string;
@@ -1361,54 +1046,656 @@ function makeTable(params: {
 }
 
 
-function specialListing(
+function updateRequestCount(count: number) {
+   let spanElem = document.getElementById("processed-count") as HTMLSpanElement;
+
+   spanElem.replaceChild(document.createTextNode(count.toString()), spanElem.firstChild as ChildNode);
+}
+
+function listingOp(
+   searchType: string,
    siteName: string,
    libName: string,
+   options: string | null,
    insertionPoint: HTMLDivElement
-) {
+): void {
    let docLibREST = new SPListREST({
          server: SERVER_NAME,
          site: siteName.match(/https:\/\/[^\/]+(.*)/)![1],
          listName: libName
-      });
+      }),
+      zero = 0,
+      listItemCount: number,
+      spanElem: HTMLSpanElement,
+      select: string,
+      expand: string,
+      selectDisplay: string[],
+      leadingPath: RegExpMatchArray | null | string;
 
+   document.getElementById("working")!.style.display = "inline-block";
+   leadingPath = siteName.match(/https:\/\/[^\/]+(\/.*)$/)![1];
    // 1. init  2. get the fields of interest, learn their type 3. construct query
    docLibREST.init().then(() => {
+      listItemCount = docLibREST.itemCount;
+      spanElem = document.getElementById("processed-count")!;
+      spanElem.replaceChild(document.createTextNode(zero.toString()),
+            spanElem.firstChild as ChildNode);
+      spanElem = document.getElementById("total-listing-count")!;
+      spanElem.appendChild(document.createTextNode(listItemCount.toString()));
+
+      select = "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl,File/Length,Folder/Name,Folder/ServerRelativeUrl,Folder/ItemCount,Created,Modified";
+      expand = "File,Folder,Folder/Files,Folder/Folders"
+      selectDisplay = ["Year", "Rel Standard"];
       docLibREST.getListItemsWithQuery({
-         select: "Id,FileSystemObjectType,File/Name,File/ServerRelativeUrl," +
-               "File/Length,Folder/Name,Folder/ServerRelativeUrl,Created,Modified",
-         selectDisplay: ["Year", "Rel Standard"],
-         expand: "File,Folder",
+         select: select,
+         selectDisplay: selectDisplay,
+         expand: expand,
+         progressReport: {
+            interval: 500,
+            callback: updateRequestCount
+         },
          filter: null
-      }) .then((response: any) => {
-         makeTable({
-            title: "Folders in " + libName + " with Required Values settings",
-            subtitle: "(Site: " + siteName + ")",
-            headers: [ "ID", "Folder Name", "Year", "Rel. Std", "Contained Items", "Modified", "Created" ],
-            display: [
-               () => { return "$$id" },
-               () => { return "$$name" },
-               () => { return "$$year" },
-               () => { return "$$relstd" },
-               () => {
-                  return {
-                     attrib: "class=whitespace",
-                     iValue: "file count: $$filesCount\nsubfolders count: $$foldersCount"
-                  }
-               },
-               (item) => { return new Date(item.created).toLocaleDateString() },
-               (item) => { return new Date(item.modified).toLocaleDateString() },
+      }).then((response: any) => {
+         updateRequestCount(docLibREST.itemCount);
+
+// =========================   Search 'Year' and 'Reliability Standard' ===============
+         if (searchType == "searchParametersListing") {
+            let yearInfo: TLookupFieldInfo,
+            relstdInfo: TLookupFieldInfo,
+            itemData: any[] = [],
+            infoTable: HTMLTableElement,
+            tr: HTMLTableRowElement,
+            td: HTMLTableCellElement,
+            chkboxElem: HTMLInputElement,
+            fileCount: number = 0,
+            folderCount: number = 0,
+            noYearCount: number = 0,
+            noRelStdCount: number = 0,
+            noBothCount: number = 0,
+            onlyUnset: boolean = false;
+
+            if (options && options?.search(/only-unset/) >= 0)
+               onlyUnset = true;
+            yearInfo = docLibREST.pullLookupFieldInfo({displayName: "Year"})!;
+            relstdInfo = docLibREST.pullLookupFieldInfo({displayName: "Rel Standard"})!;
+            for (let item of response.data) {
+               let year = item[yearInfo.fieldInternalName][yearInfo.fieldLookupFieldName],
+                     relstd = item[relstdInfo.fieldInternalName][relstdInfo.fieldLookupFieldName];
+
+               if (item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FILE)
+                  fileCount++;
+               else
+                  folderCount++;
+               if (!year) {
+                  year = "not set";
+                  if (item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FILE)
+                     noYearCount++;
+               }
+               if (!relstd) {
+                  relstd = "not set";
+                  if (item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FILE)
+                     noRelStdCount++;
+               }
+               if (item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FILE &&
+                        year == "not set" && relstd == "not set")
+                  noBothCount++;
+               if (onlyUnset == true && ((year != "not set" && relstd != "not set") ||
+                           item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FOLDER))
+                  continue;
+
+               itemData.push({
+                  id: item.Id,
+                  name: item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FOLDER ?
+                        item.Folder.Name : item.File.Name,
+                  year: year,
+                  relstd: relstd,
+                  href: item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FOLDER ?
+                        findItemUrl(item, siteName) : findItemUrl(item, siteName, true),
+                  filesCount: item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FOLDER ?
+                        item.Folder.Files.results.length : -1,
+                  foldersCount: item.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FOLDER ?
+                        (item.Folder.ItemCount - item.Folder.Files.results.length) : -1,
+                  created: item.Created,
+                  modified: item.Modified,
+                  type: item.FileSystemObjectType
+               });
+            }
+
+            insertionPoint.appendChild(infoTable = document.createElement("table"));
+            infoTable.id = "info-table";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("Document Library: "));
+            td.className = "table-label";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(docLibREST.listName));
+            td.id = "title-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("Total Items: "));
+            td.className = "table-label";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(listItemCount.toString()));
+            td.className = "item-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("Folder Items: "));
+            td.className = "table-label";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(folderCount.toString()));
+            td.className = "item-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("File Items: "));
+            td.className = "table-label";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(fileCount.toString()));
+            td.className = "item-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("File Items Missing 'Year': "));
+            td.className = "table-label-smaller";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(noYearCount.toString()));
+            td.className = "item-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("File Items Missing 'Reliability Standard': "));
+            td.className = "table-label-smaller";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(noRelStdCount.toString()));
+            td.className = "item-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("File Items Missing Both 'Year' & 'Reliability Standard': "));
+            td.className = "table-label-smaller";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode(noBothCount.toString()));
+            td.className = "item-value";
+
+            tr = document.createElement("tr");
+            infoTable.appendChild(tr);
+            td = document.createElement("td");
+            tr.appendChild(td);
+            td.appendChild(document.createTextNode("Show only file items in table with unset values: "));
+            td.className = "table-label-smaller";
+            td = document.createElement("td");
+            tr.appendChild(td);
+            chkboxElem = document.createElement("input");
+            chkboxElem.type = "checkbox";
+            chkboxElem.id = "unset-items-only";
+            chkboxElem.addEventListener("change", (evt: Event) => {
+               if ((evt.currentTarget as HTMLInputElement).checked == true)
+                  location.assign(location.href += "&options=only-unset");
+               else
+                  location.assign(location.href.replace("&options=only-unset", ""));
+            });
+            td.appendChild(chkboxElem);
+            td.className = "item-value";
+
+            makeTable({
+               title: "Folders and Files in " + libName + " with Required Values settings",
+               subtitle: "(Site: " + siteName + ")",
+               headers: [ "ID", "Folder or File Name",
+                  { title: "Year", style: "width:6em;" } ,
+                  { title: "Rel. Std", style: "width:9em;" }, "Contained Items", "Modified", "Created" ],
+               display: [
+                  () => { return "$$id" },
+                  (item) => { return {
+                        attrib: item.type == FILE_SYSTEM_OBJECT_TYPE_FILE ? "class=right italic" :
+                              item.type == FILE_SYSTEM_OBJECT_TYPE_FOLDER ?
+                                 "class=bold" : "class=green bold",
+                        iValue: "$$name",
+                        wrapLink: item.href
+                     }
+                  },
+                  () => { return {
+                        attrib: "class=bold center",
+                        iValue: "$$year"
+                     }
+                  },
+                  () => { return {
+                        attrib: "class=bold center",
+                        iValue: "$$relstd"
+                     }
+                  },
+                  (item) => {
+                     return {
+                        attrib: "class=whitespace center",
+                        iValue: item.type == FILE_SYSTEM_OBJECT_TYPE_FOLDER ?
+                              "file count: $$filesCount\nsubfolders count: $$foldersCount" : "<file>"
+                     }
+                  },
+                  (item) => { return new Date(item.modified).toLocaleDateString() },
+                  (item) => { return new Date(item.created).toLocaleDateString() },
                ],
-            data: response,
-            attach: insertionPoint,
-            options: ["addCounter{1}"]
-         });
+               data: itemData,
+               attach: insertionPoint,
+               options: ["addCounter{1}"]
+            });
+            document.getElementById("working")!.style.display = "none";
+            if (options && options?.search(/only-unset/) >= 0)
+               (document.getElementById("unset-items-only") as HTMLInputElement).checked = true;
 
+// =========================   Folders With Their Files  ===============
+
+         } else if (searchType == "foldersWithTheirFiles") {
+            let data: any[] = response.data,
+               files: libItem[] = [],
+               folders: libItemEx[] = [],
+               relUrl: string = data[0].ServerRelativeUrl,
+               found: boolean,
+               rootFolder: libItemEx = {
+                  id: -1,
+                  name: "*** Root Folder ***",
+                  itsFiles: [],
+                  itsFolders: [],
+                  type: 1,
+                  size: -1,
+                  tag: "",
+                  originalUrl: relUrl,
+                  relativeUrl: "/",
+                  created: new Date(0),
+                  modified: new Date(0)
+               },
+               tree: HTMLDivElement;
+
+            for (let datum of data)
+               if (datum.FileSystemObjectType == FILE_SYSTEM_OBJECT_TYPE_FILE)
+                  files.push({
+                     id: datum.Id,
+                     name: datum.File.Name,
+                     type: 0,
+                     originalUrl: datum.File.ServerRelativeUrl,
+                     relativeUrl: findItemUrl(datum, siteName),
+                     size: datum.File.Length,
+                     created: datum.Created,
+                     modified: datum.Modified,
+                     tag: ""
+                  });
+               else   //   FILE_SYSTEM_OBJECT_TYPE_FOLDER
+                  folders.push({
+                     id: datum.Id,
+                     name: datum.Folder.Name,
+                     type: 1,
+                     originalUrl: datum.Folder.ServerRelativeUrl,
+                     relativeUrl: findItemUrl(datum, siteName),
+                     size: -1,
+                     created: datum.Created,
+                     modified: datum.Modified,
+                     tag: "",
+                     itsFiles: [],
+                     itsFolders: []
+                  });
+
+
+   /*
+            for (let j, i = 0, k = 0; i < 2000; i++) {
+               if (files[i].relativeUrl == "/")
+                  continue;
+               k++;
+               console.log("file Path = '" + files[i].relativeUrl + "'");
+               for (j = 0; j < folders.length; j++) {
+   //             console.log("folder Path = '" + folders[j].folderPath + folders[j].name + "'");
+                  if (files[i].relativeUrl == folders[j].relativeUrl + folders[j].name + "/")
+                     break;
+               }
+               console.log("Folders counted in pass: " + j);
+
+*/
+            for (let file of files) {
+               found = false;
+               for (let folder of folders)
+                  if (file.relativeUrl == folder.relativeUrl + "/" + file.name) {
+                     folder.itsFiles.push(file);
+                     found = true;
+                     break;
+                  }
+               if (found == false)
+                  rootFolder.itsFiles.push(file);
+            }
+            for (let folder1 of folders)
+               for (let folder2 of folders)
+                  if (folder1.relativeUrl == folder2.relativeUrl + "/" + folder1.name)
+                     folder2.itsFolders.push(folder1);
+            for (let folder of folders)
+               if (folder.relativeUrl == docLibREST.serverRelativeUrl + "/" + folder.name) {
+                  rootFolder.itsFolders.push(folder);
+               }
+            insertionPoint.appendChild(tree = document.createElement("div"));
+            tree.style.marginLeft = "5em";
+            spanElem = document.createElement("span");
+            tree.appendChild(spanElem);
+            spanElem.style.font = "bold 120% 'Segoe UI',sans-serif";
+            spanElem.style.color = "navy";
+            spanElem.appendChild(document.createTextNode(libName));
+            tree.appendChild(document.createElement("br"));
+            spanElem = document.createElement("span");
+            tree.appendChild(spanElem);
+            spanElem.style.font = "bold 100% Tahoma,sans-serif";
+            spanElem.appendChild(document.createTextNode("*** root level ***"));
+            layoutFolder(
+               rootFolder,
+               {
+                  level: 0,
+                  levelItemCounts: []
+               },
+               tree
+            );
+
+ //              folders.push(rootFolder);
+            // put 'Archive' folders first
+            /*
+            {
+               let tempFolders1: libItemEx[] = [],
+                     tempFolders2: libItemEx[] = [];
+
+               for (let folder of folders)
+                  if (folder.name.search(/Archive/i) >= 0)
+                     tempFolders1.push(folder);
+                  else
+                     tempFolders2.push(folder);
+               folders = tempFolders1.concat(tempFolders2);
+            }
+
+            // final listing with folders out
+            for (let folder of folders) {
+               sortedItems.push({
+                  id: folder.id,
+                  name: folder.name,
+                  href: folder.originalUrl,
+                  size: -1,
+                  created: folder.created,
+                  modified: folder.modified,
+                  type: folder.type
+               });
+               for (let subfolder of folder.itsFolders)
+                  sortedItems.push({
+                     id: subfolder.id,
+                     name: subfolder.name,
+                     href: "",
+                     size: subfolder.size,
+                     created: subfolder.created,
+                     modified: subfolder.modified,
+                     type: 2
+                  });
+               for (let file of folder.itsFiles)
+                  sortedItems.push({
+                     id: file.id,
+                     name: file.name,
+                     href: "",
+                     size: file.size,
+                     created: file.created,
+                     modified: file.modified,
+                     type: file.type
+                  });
+            }
+
+            makeTable({
+               title: "Folders and Their Files in " + libName,
+               subtitle: "(Site: " + siteName + ")",
+               headers: [ "ID", "Folder or File Name", "Size", "Modified", "Created" ],
+               display: [
+                  () => { return "$$id" },
+                  (item) => { return {
+                        attrib: item.type == 0 ? "class=right italic" :
+                              item.type == 1 ? "class=bold" : "class=right green bold",
+                        iValue: "$$name",
+                        wrapLink: item.href
+                     }
+                  },
+                  (item) => { return item.type == 2 ? "subfolder" : item.size == -1 ? "" :
+                        item.size > (1024 * 1024) ? Math.floor(item.size / (1024 * 1024)) + " MB [ $$size ]" :
+                        item.size > 1024 ? Math.floor(item.size / 1024) + " KB [ $$size ]" :
+                        "$$size" },
+                  (item) => { return new Date(item.modified).toLocaleDateString() },
+                  (item) => { return new Date(item.created).toLocaleDateString() },
+                  ],
+               data: sortedItems,
+               attach: insertionPoint,
+               options: ["addCounter{1}"]
+            });  */
+            document.getElementById("working")!.style.display = "none";
+
+// =========================   Duplicate File Listing  ===============
+
+        } else if (searchType == "fileduplicates") {
+            let data = response.data,
+               files: libItem[] = [],
+               folders: libItem[] = [],
+               dupFiles: libItem[] = [],
+               dupFolders: libItem[] = [],
+               dupTags: string[] = [ "first", "second", "third", "fourth", "fifth", "sixth", "seventh" ];
+
+            for (let datum of data)
+               if (datum.FileSystemObjectType == 0)
+                  files.push({
+                     id: datum.Id,
+                     name: datum.File.Name,
+                     type: 0,
+                     originalUrl: datum.File.ServerRelativeUrl,
+                     relativeUrl: datum.File.ServerRelativeUrl.substring(docLibREST.serverRelativeUrl.length),
+                     parentPath: datum.File.ServerRelativeUrl.substring(docLibREST.serverRelativeUrl.length,
+                              datum.File.ServerRelativeUrl.lastIndexOf("/")),
+                     size: datum.File.Length,
+                     created: datum.Created,
+                     modified: datum.Modified,
+                     tag: ""
+                  });
+               else
+                  folders.push({
+                     id: datum.Id,
+                     name: datum.Folder.Name,
+                     type: 1,
+                     originalUrl: datum.Folder.ServerRelativeUrl,
+                     relativeUrl: datum.Folder.ServerRelativeUrl.substring(docLibREST.serverRelativeUrl.length),
+                     parentPath: datum.Folder.ServerRelativeUrl.substring(docLibREST.serverRelativeUrl.length,
+                              datum.Folder.ServerRelativeUrl.lastIndexOf("/")),
+                     size: -1,
+                     created: datum.Created,
+                     modified: datum.Modified,
+                     tag: ""
+                  });
+
+            files.sort((a: any, b: any) => {
+               return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+            });
+
+            for (let i = 0, duping = false, index = 0; i < files.length; i++)
+               if (i < files.length - 1 && files[i].name == files[i + 1].name) {
+                  duping = true;
+                  files[i].tag = dupTags[index++];
+                  dupFiles.push(files[i]);
+               } else if (duping == true) {
+                  files[i].tag = dupTags[index];
+                  dupFiles.push(files[i]);
+                  duping = false;
+                  index = 0;
+               }
+
+/*
+            for (let i = 0; i < files.length - 1; i++)
+               if (files[i].name == files[i + 1].name) {
+                  dupFiles.push(files[i]);
+                  duping = true;
+               } else if (duping == true) {
+                  dupFiles.push(files[i]);
+                  duping = false;
+               } */
+
+            makeTable({
+               title: "Replicate File Names in " + libName,
+               subtitle: "(Site: " + siteName + ")",
+               headers: [ "ID", "File Name", "Parent Path", "Size", "Created", "Modified" ],
+               display: [
+                  () => { return "$$id" },
+                  (item) => { return {
+                        attrib: "class=" + item.tag,
+                        iValue: "$$name",
+                        wrapLink: item.originalUrl
+                     }
+                  },
+                  (item) => { return {
+                        attrib: "",
+                        iValue: "$$parentPath",
+                        wrapLink: item.originalUrl.substring(0, item.originalUrl.lastIndexOf("/"))
+                     }
+                  },
+                  () => { return "$$size" },
+                  (item) => { return new Date(item.created).toLocaleDateString() },
+                  (item) => { return new Date(item.modified).toLocaleDateString() },
+                  ],
+               data: dupFiles,
+               attach: insertionPoint,
+               options: ["addCounter{1}"]
+            });
+
+            folders.sort((a: any, b: any) => {
+               return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+            });
+
+            for (let i = 0, duping = false, index = 0; i < folders.length; i++)
+               if (i < folders.length - 1 && folders[i].name == folders[i + 1].name) {
+                  duping = true;
+                  folders[i].tag = dupTags[index++];
+                  dupFolders.push(folders[i]);
+               } else if (duping == true) {
+                  folders[i].tag = dupTags[index];
+                  dupFolders.push(folders[i]);
+                  duping = false;
+                  index = 0;
+               }
+/*
+            for (let i = 0; i < folders.length - 1; i++)
+               if (folders[i].name == folders[i + 1].name) {
+                  dupFolders.push(folders[i]);
+                  duping = true;
+               } else if (duping == true) {
+                  dupFolders.push(folders[i]);
+                  duping = false;
+               } */
+
+            makeTable({
+               title: "Replicate Folder Names in " + libName,
+               subtitle: "(Site: " + siteName + ")",
+               headers: [ "ID", "Folder Name", "Parent Path", "Created", "Modified" ],
+               display: [
+                  () => { return "$$id" },
+                  (item) => { return {
+                        attrib: "class=" + item.tag,
+                        iValue: "$$name",
+                        wrapLink: item.originalUrl
+                     }
+                  },
+                  (item) => { return {
+                        attrib: "",
+                        iValue: "$$parentPath",
+                        wrapLink: item.originalUrl.substring(0, item.originalUrl.lastIndexOf("/"))
+                     }
+                  },
+                  (item) => { return new Date(item.created).toLocaleDateString() },
+                  (item) => { return new Date(item.modified).toLocaleDateString() },
+                  ],
+               data: dupFolders,
+               attach: insertionPoint,
+               options: ["addCounter{1}"]
+            });
+            document.getElementById("working")!.style.display = "none";
+        }
       }).catch((response: any) => {
-
+         console.log("SPListREST.getItemsWithQuery() failure: " + JSON.stringify(response, null, "  "));
       });
    }).catch((response: any) => {
+      console.log("SPListREST.init() failure: " + JSON.stringify(response, null, "  "));
    });
+
+   /**
+    * @function layoutFolder -- used by list folder with files section
+    *     this is a closure
+    */
+   function layoutFolder(
+      folder: libItemEx,
+      levelInfo: {
+         level: number;
+         levelItemCounts: number[];
+      },
+      tree: HTMLElement
+   ): void {
+      let typedText: string,
+         line: number,
+         folderItems: (libItem | libItemEx)[];
+
+      folderItems = folder.itsFolders.concat(folder.itsFiles);
+      folderItems.sort((elem1, elem2) => {
+         return elem1.name > elem2.name ? 1 : elem1.name < elem2.name ? -1 : 0;
+      });
+      levelInfo.levelItemCounts.push(folderItems.length);
+      for (let item of folderItems) {
+         typedText = "\n";
+         for (line = 0; line < levelInfo.level; line++)
+            typedText += BOX_DRAWINGS_LIGHT_VERTICAL + '\u00a0\u00a0\u00a0\u00a0\u00a0';
+         if (levelInfo.levelItemCounts[levelInfo.level] == 1)
+            typedText += BOX_DRAWINGS_LIGHT_UP_AND_RIGHT;
+         else
+            typedText += BOX_DRAWINGS_LIGHT_VERTICAL_AND_RIGHT;
+         typedText += BOX_DRAWINGS_LIGHT_HORIZONTAL + BOX_DRAWINGS_LIGHT_HORIZONTAL + '\u00a0';
+         spanElem = document.createElement("span");
+         tree.appendChild(spanElem);
+         spanElem.appendChild(document.createTextNode(typedText));
+         spanElem.className = "monotype";
+         spanElem = document.createElement("span");
+         tree.appendChild(spanElem);
+         spanElem.appendChild(document.createTextNode(item.name));
+         levelInfo.levelItemCounts[levelInfo.level]--;
+         if (item.type == FILE_SYSTEM_OBJECT_TYPE_FOLDER) {
+            spanElem.className = "tree-folder";
+            layoutFolder(
+               item as libItemEx,
+               {
+                  level: levelInfo.level + 1,
+                  levelItemCounts: levelInfo.levelItemCounts
+               },
+               tree
+            );
+         } else if (levelInfo.levelItemCounts[levelInfo.level] == 0) {
+            levelInfo.level--;
+            if (levelInfo.levelItemCounts.length == 1)
+               throw "error in code: about to pop() array with length already 1";
+               levelInfo.levelItemCounts.pop();
+         }
+         if (levelInfo.level < 0)
+            throw "error in code: level < 0";
+      }
+      return;
+   }
 }
 
 function customListing() {
@@ -1417,6 +1704,12 @@ function customListing() {
    document.getElementById("custom-listing-genurl")!.style.display = "inline";
 }
 
+/**
+ * @function updateListing -- creates a special table of files adn folders (early version of these things)
+ * @param options
+ * @calledby LibraryListing.aspx button 'Update Listing'
+ * @calls processData()
+ */
 function updateListing(options?: TListingOptions) {
    const form: HTMLFormElement = document.getElementById("LibListingForm") as HTMLFormElement;
    let url: string,
@@ -1478,10 +1771,10 @@ function updateListing(options?: TListingOptions) {
 	url = SiteUrl + "/_api/web/lists/getByTitle('" + libName + "')/items?" +
 			itemsSelect + "&" + itemsExpand + (filter.length > 0 ? "&" + filter : "");
 	//progressAlert("show");
-   SPRESTSupportLib.RESTrequest({
+   RESTrequest({
    	url: url,
       method: "GET",
-      	successCallback: (data) => {
+      	successCallback: (data: any) => {
      //    	progressAlert("hide");
  //           FirstRun = true;
             if (data.d && data.d.results)
@@ -1491,7 +1784,7 @@ function updateListing(options?: TListingOptions) {
             else
                 alert("An exception occurred!");
         },
-        errorCallback: (reqObj) => {
+        errorCallback: (reqObj: JQueryXHR) => {
  //           progressAlert("hide");
  //           progressAlert("error");
             console.log("URL => " + url);
@@ -1500,6 +1793,12 @@ function updateListing(options?: TListingOptions) {
     });
 }
 
+/**
+ * @function processData -- the workhorse for making the table
+ * @param itemsData
+ * @param options
+ * @calledby updateListing()
+ */
 function processData(
     itemsData: any[],
     options: any
@@ -1942,11 +2241,11 @@ function listByFolderGrouping(
 }
 
 function dataTransformer() {
-    SPRESTSupportLib.RESTrequest({
+    RESTrequest({
         url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                             "getByTitle('PSMP_dev')?$expand=ContentTypes&$select=ContentTypes/Id/StringValue,ContentTypes/Name",
         method: "GET",
-        successCallback: (data) => {
+        successCallback: (data: any) => {
             let ListContentTypes: {
                 name: string;
                 id: string;
@@ -1962,13 +2261,13 @@ function dataTransformer() {
                     id: result.Id.StringValue
                 });
             }
-            SPRESTSupportLib.RESTrequest({
+            RESTrequest({
                 url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                             "getByTitle('PSMP_dev')/items?$select=Id,Level_x0020_1,File/Name" +
                             ((DocumentContentTypeId != null) ? "&$filter=ContentTypeId eq '" + DocumentContentTypeId + "'" : "") +
                             "&$expand=File",
                 method: "GET",
-                successCallback: (data) => {
+                successCallback: (data: any) => {
                     let ctype: {
                             name: string;
                             id: string;
@@ -1983,7 +2282,7 @@ function dataTransformer() {
                                 break;
                         console.log("modifying file '" + results[idx].File.Name + "'");
                         setTimeout(() => {
-                            SPRESTSupportLib.RESTrequest({
+                            RESTrequest({
                                 setDigest: true,
                                 url: "https://cawater.sharepoint.com/teams/swp-dom/RSO/_api/web/lists/" +
                                         "getByTitle('PSMP_dev')/items(" + results[idx].Id + ")",
@@ -1992,29 +2291,29 @@ function dataTransformer() {
                                     "X-HTTP-METHOD": "MERGE",
 					                "IF-MATCH": "*"
                                 },
-                                data: SPRESTSupportLib.formatRESTBody({
+                                data: formatRESTBody({
                                     "ListItemEntityTypeFullName": "SP.Data.PSMP_x005f_DevItem",
                                     "ContentTypeId": ctype.id
                                 }),
-                                successCallback: (data, text, reqObj) => {
+                                successCallback: (data: any, text?: string, reqObj?: JQueryXHR) => {
                                     console.log("response data => " +
                                         JSON.stringify(data) +
                                         "\nrequestObj => " +
                                         JSON.stringify(reqObj));
                                 },
-                                errorCallback: (reqObj) => {
+                                errorCallback: (reqObj: JQueryXHR) => {
                                     console.log(JSON.stringify(reqObj, null, "  "));
                                 }
                             });
                         }, 5000);
                     }
                 },
-                errorCallback: (reqObj) => {
+                errorCallback: (reqObj: JQueryXHR) => {
                   console.log(JSON.stringify(reqObj, null, "  "));
                }
             });
         },
-        errorCallback: (reqObj) => {
+        errorCallback: (reqObj: JQueryXHR) => {
          console.log(JSON.stringify(reqObj, null, "  "));
       }
     });

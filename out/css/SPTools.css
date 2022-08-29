@@ -301,7 +301,7 @@ p.request-control {
 
 span.sub-control {
   display:grid;
-  grid-template-columns: auto;
+  grid-template-columns: auto 1fr;
 }
 
 span.input-control {

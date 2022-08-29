@@ -11,7 +11,9 @@ function Get-ObjectProperty {
       Write-Host "`$PSObject.`$ObjectProperty -is [array]:" ($PSObject.$ObjectProperty -is [array])
       Write-Host "`$PSObject.`$ObjectProperty.GetType(): " $PSObject.$ObjectProperty.GetType()
       Write-Host "`$PSObject.`$ObjectProperty: " $PSObject.$ObjectProperty
-      $PSObject.PSObject.Properties.Item($ObjectProperty) ? $PSObject.$ObjectProperty : $null
+      if ($PSObject.PSObject.Properties.Item($ObjectProperty)) {
+         ,$PSObject.$ObjectProperty
+      }
    }
 }
 

@@ -15,11 +15,10 @@ div#liblist-container {
    font: normal 11pt Arial, sans-serif;
 }
 
-form#LibListingForm {
+form#theForm {
    border: 1px solid blue;
    padding: 1em 3em;
    min-height: 25em;
-   width: 90em;
 }
 
 p#title {
@@ -108,40 +107,4 @@ td.folderpath {
    font: bold 14pt Tahoma,sans-serif;
    text-align: right;
    padding-right: calc((35em - 10em) * .30 );
-}
-
-a {
-   color: black!important;
-}
-
-.first {
-   background-color: rgb(250 253 188);
-}
-.second {
-   background-color: rgb(167 247 150);
-}
-.third {
-   background-color: rgb(139 204 255);
-}
-.fourth {
-   background-color: rgb(255 141 207);
-}
-.fifth {
-   background-color: rgb(245 160 236);
-}
-.sixth {
-   background-color: rgb(255 203 106);
-}
-.seventh {
-   background-color: rgb(67 249 249);
-}
-
-.monotype {
-   white-space: pre;
-   font: normal 100% 'Courier New',Courier,monospace;
-}
-
-.tree-folder {
-   font: italic bold 100% Arial,sans-serif;
-   color: green;
 }

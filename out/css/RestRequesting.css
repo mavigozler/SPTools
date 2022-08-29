@@ -1,0 +1,86 @@
+div#restreq-container {
+   display: none;
+   width: 70%;
+   padding: 1em 2em;
+   margin: 2em auto;
+   font: normal 10pt Arial, sans-serif;
+}
+
+#restreq-container label {
+   font: bold 10pt 'Segoe UI', Helvetica, sans-serif;
+   color: purple;
+}
+
+#restreq-container input {
+   font: normal 12pt Arial, Tahoma, sans-serif;
+}
+
+#request-button {
+   font: bold 14pt Arial, sans-serif !important;
+}
+
+#restreq-container button {
+   font: normal 10pt Arial, sans-serif;
+}
+
+#previous {
+   width: 100%;
+}
+
+#main-grid {
+   display: grid;
+   grid-template-columns: auto 1fr;
+
+   row-gap: 5px;
+}
+
+.radio-control {
+   display: inline-block;
+   margin-right: 2em;
+}
+
+div#special-sets {
+   display: none;
+}
+
+p#headers {
+   margin: 0;
+   display: grid;
+   grid-template-columns: auto auto;
+}
+
+p#settings {
+   display: none;
+   float: right;
+   margin: 0;
+   text-align: right;
+}
+
+span.headerset button {
+   font: bold 10pt Helvetica, sans-serif;
+   padding: 0;
+   line-height: 11pt;
+}
+
+.hname {
+   font: normal 9pt Helvetica, sans-serif;
+   width: 28%;
+   border: 2px solid blue;
+   text-align: right;
+}
+
+.hvalue {
+   font: normal 9pt Helvetica, sans-serif;
+   width: 60%;
+   border: 2px solid green;
+}
+
+#headermenu {
+   display: none;
+   float: right;
+}
+
+button.trash-button {
+   min-width: 10px;
+   margin-right: 6px;
+}
